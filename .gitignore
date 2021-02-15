@@ -4,3 +4,5 @@
 CPPLINT.cfg
 # ignore builds
 /*/[Bb]uild/
+
+.DS_Store
