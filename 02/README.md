@@ -23,3 +23,7 @@ Build examples:
 ```bash
 mkdir build && cd build && cmake .. && make
 ```
+
+## Result
+
+![](./screenshot/main.png)
