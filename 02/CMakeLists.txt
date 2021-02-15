@@ -3,3 +3,4 @@ project(02)
 
 add_subdirectory(src/idle)
 add_subdirectory(src/interact)
+add_subdirectory(src/assignment)

@@ -1,3 +1,6 @@
+# ignore vs config
 .vs
-
+# ignore linter config
+CPPLINT.cfg
+# ignore builds
 /*/[Bb]uild/

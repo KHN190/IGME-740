@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowSize(rasterSize[0], rasterSize[1]);
     glutCreateWindow("Mouse Event - draw a triangle");
-    
+
     glutReshapeFunc(reshape);
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
