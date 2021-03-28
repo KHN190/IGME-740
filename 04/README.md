@@ -14,6 +14,12 @@ ln -s ../Mesh .
 ./run
 ```
 
+# Use
+
+See [shaders](./shaders) for per vertex & per fragment implementation. Press `s` to select between lights. The selected light will be rendered with wireframe, though it's not very obvious. I used script to move the lights, which also changes the lighting, and kept the demonstration that they can be selected using keyboard.
+
+Lighting colors, number of lights and objects are hardcoded.
+
 # Requirements
 
 * 2 lighting sources
