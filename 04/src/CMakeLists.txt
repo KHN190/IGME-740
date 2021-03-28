@@ -11,10 +11,9 @@ find_package(GLUT REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS})
 
 # GLM for math
-find_package(GLM REQUIRED)
-include_directories(${GLM_INCLUDE_DIRS})
+add_subdirectory(./lib/glm)
 
-target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${GLEW_LIBRARIES} GLEW::GLEW ${GLM_LIBRARY_DIRS} glm)
+target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${GLEW_LIBRARIES} GLEW::GLEW glm::glm)
 add_definitions(${GLM_DEFINITIONS})
 
 # Use C++11 version of the standard
