@@ -42,43 +42,60 @@ Text g_text;
 unsigned char g_keyStates[256];
 
 #ifdef __APPLE__
-char v_shader_file[] = "./shaders/basic.vert";
-char f_shader_file[] = "./shaders/basic.frag";
+char v_basic[] = "./shaders/basic.vert";
+char f_basic[] = "./shaders/basic.frag";
+char v_shader_per_vertex[] = "./shaders/perVert_phong.vert";
+char f_shader_per_vertex[] = "./shaders/perVert_phong.frag";
+char v_shader_per_frag[] = "./shaders/perFrag_phong.vert";
+char f_shader_per_frag[] = "./shaders/perFrag_phong.frag";
 #endif
 
 #ifdef __linux__
-char v_shader_file[] = "./shaders/basic.vert";
-char f_shader_file[] = "./shaders/basic.frag";
+char v_basic[] = "./shaders/basic.vert";
+char f_basic[] = "./shaders/basic.frag";
+char v_shader_per_vertex[] = "./shaders/perVert_phong.vert";
+char f_shader_per_vertex[] = "./shaders/perVert_phong.frag";
+char v_shader_per_frag[] = "./shaders/perFrag_phong.vert";
+char f_shader_per_frag[] = "./shaders/perFrag_phong.frag";
 #endif
 
 #ifdef _WIN32
-char v_shader_file[] = ".\\shaders\\basic.vert";
-char f_shader_file[] = ".\\shaders\\basic.frag";
+char v_basic[] = ".\\shaders\\basic.vert";
+char f_basic[] = ".\\shaders\\basic.frag";
+char v_shader_per_vertex[] = ".\\shaders\\perVert_phong.vert";
+char f_shader_per_vertex[] = ".\\shaders\\perVert_phong.frag";
+char v_shader_per_frag[] = ".\\shaders\\perFrag_phong.vert";
+char f_shader_per_frag[] = ".\\shaders\\perFrag_phong.frag";
 #endif
 
-const char meshFile[128] =
-    // "Mesh/sphere.obj";
-    // "Mesh/bunny2K.obj";
-    "Mesh/teapot.obj";
-    // "Mesh/teddy.obj";
+const char meshFile[] = "Mesh/teapot.obj";
+const char lightMesh[] = "Mesh/sphere.obj";
 
+// obj mesh
 Mesh g_mesh_0;
 Mesh g_mesh_1;
 
-Mesh g_meshes[2];
+// light mesh
+Mesh l_mesh_0;
+Mesh l_mesh_1;
 
-vec3 g_lightPos = vec3(3, 3, 3);
+vec3 g_lightPos0 = vec3(3, 3, 3);
+vec3 g_lightPos1 = vec3(1, 0, -2);
 float g_time = 0.0f;
 
+// select light
+bool l0_select = true;
+bool l1_select = false;
+
 void initialization() {
-  g_cam.set(1.0f, 2.0f, 4.0f, 0.0f, 1.0f, -0.5f, g_winWidth, g_winHeight);
+  g_cam.set(3.0f, 4.0f, 14.0f, 0.0f, 1.0f, -0.5f, g_winWidth, g_winHeight);
   g_text.setColor(0.0f, 0.0f, 0.0f);
 
-  g_mesh_0.create(meshFile, v_shader_file, f_shader_file);
-  g_mesh_1.create(meshFile, v_shader_file, f_shader_file);
+  g_mesh_0.create(meshFile, v_shader_per_vertex, f_shader_per_vertex);
+  g_mesh_1.create(meshFile, v_shader_per_frag, f_shader_per_frag);
 
-  g_meshes[0] = g_mesh_0;
-  g_meshes[1] = g_mesh_1;
+  l_mesh_0.create(meshFile, v_basic, f_basic);
+  l_mesh_1.create(meshFile, v_basic, f_basic);
 }
 
 /****** GL callbacks ******/
@@ -96,9 +113,11 @@ void initialGL() {
 }
 
 void idle() {
-  // add any stuff to update at runtime ....
+  g_lightPos0.x = 3.0 * std::sin(g_time);
+  g_lightPos0.z = 3.0 * std::cos(g_time);
 
-  g_cam.keyOperation(g_keyStates, g_winWidth, g_winHeight);
+  g_lightPos1.x = 1.0 * std::sin(g_time * 2.0);
+  g_lightPos1.z = -2.0 * std::cos(g_time * 2.0);
 
   glutPostRedisplay();
 }
@@ -121,20 +140,22 @@ void display() {
   string str;
   if (g_cam.isFocusMode()) {
     str = "Cam mode: Focus";
-    g_text.draw(10, 30, const_cast<char *>(str.c_str()), g_winWidth,
-                g_winHeight);
+    g_text.draw(10, 30, const_cast<char *>(str.c_str()), g_winWidth, g_winHeight);
   } else if (g_cam.isFPMode()) {
     str = "Cam mode: FP";
-    g_text.draw(10, 30, const_cast<char *>(str.c_str()), g_winWidth,
-                g_winHeight);
+    g_text.draw(10, 30, const_cast<char *>(str.c_str()), g_winWidth, g_winHeight);
   }
-  str = "vertex count: " + std::to_string(g_meshes[0].vert_num);
+  str = "vertex count: " + std::to_string(g_mesh_0.vert_num);
   g_text.draw(10, 45, const_cast<char *>(str.c_str()), g_winWidth, g_winHeight);
-  str = "triangle count: " + std::to_string(g_meshes[0].tri_num);
+  str = "triangle count: " + std::to_string(g_mesh_0.tri_num);
   g_text.draw(10, 60, const_cast<char *>(str.c_str()), g_winWidth, g_winHeight);
 
   g_time = (float)glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
-  g_meshes[0].draw(g_cam.viewMat, g_cam.projMat, g_lightPos, g_time);
+  g_mesh_0.draw(g_cam.viewMat, g_cam.projMat, vec3(0.0, 2.0, 0.0), g_lightPos0, g_lightPos1, g_cam.getEyeVec3(), g_time, false, 0.5f);
+  g_mesh_1.draw(g_cam.viewMat, g_cam.projMat, vec3(3.0, 2.0, 0.0), g_lightPos0, g_lightPos1, g_cam.getEyeVec3(), g_time, false, 0.5f);
+
+  l_mesh_0.draw(g_cam.viewMat, g_cam.projMat, g_lightPos0, g_lightPos0, g_lightPos1, g_cam.getEyeVec3(), g_time, l0_select, 0.1f);
+  l_mesh_1.draw(g_cam.viewMat, g_cam.projMat, g_lightPos1, g_lightPos0, g_lightPos1, g_cam.getEyeVec3(), g_time, l1_select, 0.1f);
 
   glutSwapBuffers();
 }
@@ -171,11 +192,15 @@ void keyboard(unsigned char key, int x, int y) {
   case ' ':
     g_cam.PrintProperty();
     break;
+  case 's':
+    l0_select = !l0_select;
+    l1_select = !l1_select;
+    break;
   case '+':
-    g_meshes[0].normal_offset += 0.01;
+    g_mesh_0.normal_offset += 0.01;
     break;
   case '-':
-    g_meshes[0].normal_offset -= 0.01;
+    g_mesh_0.normal_offset -= 0.01;
   }
 }
 
