@@ -72,8 +72,8 @@ char f_shader_file[] = ".\\shaders\\basic.frag";
 const char meshFile[128] =
     //"Mesh/sphere.obj";
     //"Mesh/bunny2K.obj";
-    //"Mesh/teapot.obj";
-    "Mesh/teddy.obj";
+    "Mesh/teapot.obj";
+    // "Mesh/teddy.obj";
 
 Mesh g_mesh;
 
