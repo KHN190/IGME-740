@@ -43,7 +43,14 @@ unsigned char g_keyStates[256];
 #ifdef __APPLE__
 char v_shader_file[] = "./shaders/basic.vert";
 char f_shader_file[] = "./shaders/basic.frag";
-#else
+#endif
+
+#ifdef __linux__
+char v_shader_file[] = "./shaders/basic.vert";
+char f_shader_file[] = "./shaders/basic.frag";
+#endif
+
+#ifdef _WIN32
 char v_shader_file[] = ".\\shaders\\basic.vert";
 //".\\shaders\\displacement.vert"; // vertex displacement shader with perlin
 //noise
