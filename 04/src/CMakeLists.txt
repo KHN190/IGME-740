@@ -5,6 +5,10 @@ project(run)
 add_executable(${PROJECT_NAME} main.cpp)
 
 # Use OpenGL, GLEW and GLUT
+if(POLICY CMP0072)
+  cmake_policy(SET CMP0072 NEW)
+endif()
+
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(GLUT REQUIRED)
@@ -13,7 +17,7 @@ include_directories(${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS} ${GLEW_INCLUDE_
 # GLM for math
 add_subdirectory(./lib/glm)
 
-target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${GLEW_LIBRARIES} GLEW::GLEW glm::glm)
+target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} GLEW::GLEW glm::glm)
 add_definitions(${GLM_DEFINITIONS})
 
 # Use C++11 version of the standard

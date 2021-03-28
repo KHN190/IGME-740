@@ -5,6 +5,9 @@ project(transform)
 add_executable(${PROJECT_NAME} main.cpp)
 
 # Use OpenGL and GLUT
+if(POLICY CMP0072)
+  cmake_policy(SET CMP0072 NEW)
+endif()
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 include_directories( ${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS} )
