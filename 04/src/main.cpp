@@ -29,6 +29,7 @@
 #include "Text.h"
 
 #include <iostream>
+#include <vector>
 using namespace std;
 using namespace glm;
 
@@ -52,30 +53,19 @@ char f_shader_file[] = "./shaders/basic.frag";
 
 #ifdef _WIN32
 char v_shader_file[] = ".\\shaders\\basic.vert";
-//".\\shaders\\displacement.vert"; // vertex displacement shader with perlin
-//noise
-//".\\shaders\\perVert_lambert.vert"; // basic lambert lighting
-// ".\\shaders\\perFrag_lambert.vert"; // basic lambert lighting with
-// per-fragment implementation
-// ".\\shaders\\toon_shading.vert"; // basic toon shading with per-fragment
-// implementation
 char f_shader_file[] = ".\\shaders\\basic.frag";
-// ".\\shaders\\displacement.frag"; // vertex displacement shader with perlin
-// noise
-// ".\\shaders\\perVert_lambert.frag"; // basic lambert shading
-// ".\\shaders\\perFrag_lambert.frag"; // basic lambert shading with
-// per-fragment implementation
-// ".\\shaders\\toon_shading.frag"; // basic toon shading with per-fragment
-// implementation
 #endif
 
 const char meshFile[128] =
-    //"Mesh/sphere.obj";
-    //"Mesh/bunny2K.obj";
-    //"Mesh/teapot.obj";
-    "Mesh/teddy.obj";
+    // "Mesh/sphere.obj";
+    // "Mesh/bunny2K.obj";
+    "Mesh/teapot.obj";
+    // "Mesh/teddy.obj";
 
-Mesh g_mesh;
+Mesh g_mesh_0;
+Mesh g_mesh_1;
+
+Mesh g_meshes[2];
 
 vec3 g_lightPos = vec3(3, 3, 3);
 float g_time = 0.0f;
@@ -84,8 +74,11 @@ void initialization() {
   g_cam.set(1.0f, 2.0f, 4.0f, 0.0f, 1.0f, -0.5f, g_winWidth, g_winHeight);
   g_text.setColor(0.0f, 0.0f, 0.0f);
 
-  g_mesh.create(meshFile, v_shader_file, f_shader_file);
-  // add any stuff you want to initialize ...
+  g_mesh_0.create(meshFile, v_shader_file, f_shader_file);
+  g_mesh_1.create(meshFile, v_shader_file, f_shader_file);
+
+  g_meshes[0] = g_mesh_0;
+  g_meshes[1] = g_mesh_1;
 }
 
 /****** GL callbacks ******/
@@ -135,13 +128,13 @@ void display() {
     g_text.draw(10, 30, const_cast<char *>(str.c_str()), g_winWidth,
                 g_winHeight);
   }
-  str = "vertex count: " + std::to_string(g_mesh.vert_num);
+  str = "vertex count: " + std::to_string(g_meshes[0].vert_num);
   g_text.draw(10, 45, const_cast<char *>(str.c_str()), g_winWidth, g_winHeight);
-  str = "triangle count: " + std::to_string(g_mesh.tri_num);
+  str = "triangle count: " + std::to_string(g_meshes[0].tri_num);
   g_text.draw(10, 60, const_cast<char *>(str.c_str()), g_winWidth, g_winHeight);
 
   g_time = (float)glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
-  g_mesh.draw(g_cam.viewMat, g_cam.projMat, g_lightPos, g_time);
+  g_meshes[0].draw(g_cam.viewMat, g_cam.projMat, g_lightPos, g_time);
 
   glutSwapBuffers();
 }
@@ -179,10 +172,10 @@ void keyboard(unsigned char key, int x, int y) {
     g_cam.PrintProperty();
     break;
   case '+':
-    g_mesh.normal_offset += 0.01;
+    g_meshes[0].normal_offset += 0.01;
     break;
   case '-':
-    g_mesh.normal_offset -= 0.01;
+    g_meshes[0].normal_offset -= 0.01;
   }
 }
 
@@ -210,6 +203,7 @@ int main(int argc, char **argv) {
 
   initialization();
 
+  cout << "initialization finished\n";
   glutMainLoop();
   return EXIT_SUCCESS;
 }

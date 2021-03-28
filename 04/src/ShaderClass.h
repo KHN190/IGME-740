@@ -11,6 +11,7 @@ using namespace std;
 class ShaderClass {
 public:
   unsigned int id;
+  unsigned int ref_count;
   // unsigned int vShader, fShader, cShader;
   // GLuint curAttributeLoc;
 public:

@@ -116,6 +116,7 @@ void Mesh::prepareVBOandShaders(const char *v_shader_file,
 void Mesh::create(const char *filename, const char *v_shader_file,
                   const char *f_shader_file) {
 
+  cout<< "creating mesh\n";
   vector<vec3> ori_vertices;
   vector<uvec3> ori_triangles;
 
@@ -172,7 +173,9 @@ void Mesh::create(const char *filename, const char *v_shader_file,
   }
 
   computeNormals();
+  cout << "  normals created.\n";
   prepareVBOandShaders(v_shader_file, f_shader_file);
+  cout << "  shaders created.\n";
 }
 
 void Mesh::draw(mat4 viewMat, mat4 projMat, vec3 lightPos, float time) {
