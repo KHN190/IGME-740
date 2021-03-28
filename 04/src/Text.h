@@ -33,9 +33,9 @@ inline void Text::setColor(float r, float g, float b) {
   color[2] = b;
 }
 
-inline void Text::draw(const float x, const float y, char *textContent,
-                       const int winW, const int winH,
-                       const int characterSpace) {
+inline void Text ::draw(const float x, const float y, char *textContent,
+                        const int winW, const int winH,
+                        const int characterSpace) {
   glDisable(GL_LIGHTING);
   glDisable(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);

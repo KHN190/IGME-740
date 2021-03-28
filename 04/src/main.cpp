@@ -12,17 +12,16 @@
 // function Toon shading shader - catoonish rendering effects Per-vertex shading
 // v.s. per-fragment shading = visual comparison between two types of shading
 
-#ifdef __APPLE__
-#include "GL/glew.h"
-#include <GLUT/glut.h>
-#else /* */
 #include <GL/glew.h>
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
 #include <GL/freeglut.h>
-#endif /* */
+#endif
 #include <glm/glm.hpp>
-#include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/constants.hpp>
 #include <glm/gtx/string_cast.hpp>
 
 #include "Camera.h"
@@ -32,13 +31,20 @@
 #include <iostream>
 using namespace std;
 using namespace glm;
+
 int g_winWidth = 1024;
 int g_winHeight = 512;
+
 Camera g_cam;
 Text g_text;
-unsigned char g_keyStates[256];
-char v_shader_file[] = ".\\shaders\\basic.vert";
 
+unsigned char g_keyStates[256];
+
+#ifdef __APPLE__
+char v_shader_file[] = "./shaders/basic.vert";
+char f_shader_file[] = "./shaders/basic.frag";
+#else
+char v_shader_file[] = ".\\shaders\\basic.vert";
 //".\\shaders\\displacement.vert"; // vertex displacement shader with perlin
 //noise
 //".\\shaders\\perVert_lambert.vert"; // basic lambert lighting
@@ -47,7 +53,6 @@ char v_shader_file[] = ".\\shaders\\basic.vert";
 // ".\\shaders\\toon_shading.vert"; // basic toon shading with per-fragment
 // implementation
 char f_shader_file[] = ".\\shaders\\basic.frag";
-
 // ".\\shaders\\displacement.frag"; // vertex displacement shader with perlin
 // noise
 // ".\\shaders\\perVert_lambert.frag"; // basic lambert shading
@@ -55,19 +60,24 @@ char f_shader_file[] = ".\\shaders\\basic.frag";
 // per-fragment implementation
 // ".\\shaders\\toon_shading.frag"; // basic toon shading with per-fragment
 // implementation
+#endif
+
 const char meshFile[128] =
     //"Mesh/sphere.obj";
     //"Mesh/bunny2K.obj";
     //"Mesh/teapot.obj";
     "Mesh/teddy.obj";
+
 Mesh g_mesh;
+
 vec3 g_lightPos = vec3(3, 3, 3);
 float g_time = 0.0f;
+
 void initialization() {
   g_cam.set(1.0f, 2.0f, 4.0f, 0.0f, 1.0f, -0.5f, g_winWidth, g_winHeight);
   g_text.setColor(0.0f, 0.0f, 0.0f);
-  g_mesh.create(meshFile, v_shader_file, f_shader_file);
 
+  g_mesh.create(meshFile, v_shader_file, f_shader_file);
   // add any stuff you want to initialize ...
 }
 
@@ -75,25 +85,34 @@ void initialization() {
 void initialGL() {
   glDisable(GL_LIGHTING);
   glEnable(GL_DEPTH_TEST);
+
   glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
+
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 }
+
 void idle() {
   // add any stuff to update at runtime ....
+
   g_cam.keyOperation(g_keyStates, g_winWidth, g_winHeight);
+
   glutPostRedisplay();
 }
+
 void display() {
   glClearColor(1.0, 1.0, 1.0, 0.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // add any stuff you'd like to draw
+
   glUseProgram(0);
   glDisable(GL_LIGHTING);
   glEnable(GL_DEPTH_TEST);
+
   g_cam.drawGrid();
   g_cam.drawCoordinateOnScreen(g_winWidth, g_winHeight);
   g_cam.drawCoordinate();
@@ -113,10 +132,13 @@ void display() {
   g_text.draw(10, 45, const_cast<char *>(str.c_str()), g_winWidth, g_winHeight);
   str = "triangle count: " + std::to_string(g_mesh.tri_num);
   g_text.draw(10, 60, const_cast<char *>(str.c_str()), g_winWidth, g_winHeight);
+
   g_time = (float)glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
   g_mesh.draw(g_cam.viewMat, g_cam.projMat, g_lightPos, g_time);
+
   glutSwapBuffers();
 }
+
 void reshape(int w, int h) {
   g_winWidth = w;
   g_winHeight = h;
@@ -131,8 +153,11 @@ void reshape(int w, int h) {
 void mouse(int button, int state, int x, int y) {
   g_cam.mouseClick(button, state, x, y, g_winWidth, g_winHeight);
 }
+
 void motion(int x, int y) { g_cam.mouseMotion(x, y, g_winWidth, g_winHeight); }
+
 void keyup(unsigned char key, int x, int y) { g_keyStates[key] = false; }
+
 void keyboard(unsigned char key, int x, int y) {
   g_keyStates[key] = true;
   switch (key) {
@@ -156,12 +181,18 @@ void keyboard(unsigned char key, int x, int y) {
 
 int main(int argc, char **argv) {
   glutInit(&argc, argv);
+#ifdef __APPLE__
+  glutInitDisplayMode(GLUT_3_2_CORE_PROFILE | GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
+#else
   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
+#endif
   glutInitWindowSize(g_winWidth, g_winHeight);
   glutInitWindowPosition(0, 0);
   glutCreateWindow("VertFrag Shader Example");
+
   glewInit();
   initialGL();
+
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);
   glutMouseFunc(mouse);
@@ -169,7 +200,9 @@ int main(int argc, char **argv) {
   glutKeyboardUpFunc(keyup);
   glutKeyboardFunc(keyboard);
   glutIdleFunc(idle);
+
   initialization();
+
   glutMainLoop();
   return EXIT_SUCCESS;
 }

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1)
 project(run)
 
 # Project sources
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} main.cpp Camera.cpp Mesh.cpp ShaderClass.cpp ShaderProgram.cpp)
 
 # Use OpenGL, GLEW and GLUT
 if(POLICY CMP0072)

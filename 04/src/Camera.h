@@ -2,14 +2,17 @@
 #define GLM_FORCE_RADIANS
 #define GLM_SWIZZLE
 #include <glm/glm.hpp>
-#include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/constants.hpp>
+
 using namespace glm;
+
 class Camera {
 public:
   vec4 eye;
   vec4 lookat;
+
   mat4 viewMat;
   mat4 projMat;
 
@@ -18,17 +21,21 @@ private:
   float aspect; // the window ration equal to w/h
   float near_plane;
   float far_plane;
+
   vec4 axis_n; // eye-lookat
   vec4 axis_u;
   vec4 axis_v; // up axis
   vec4 world_up;
+
   vec2 mouse_pos; // the cursor position of moving mouse
   vec2 mouse_pre_pos;
   unsigned short mouse_button;
+
   vec2 key_pos; // the translated step changed by keyboard operation in FP cam
                 // mode
   vec2 key_pre_pos;
   bool m_altKey; // detect if ALT pressed
+
   int m_mode;
 
   // View Frustum
@@ -54,6 +61,7 @@ public:
   void set(float eye_x, float eye_y, float eye_z, float lookat_x,
            float lookat_y, float lookat_z, int winW, int winH,
            float p_angle = 45.0f, float p_near = 0.1f, float p_far = 10000.0f);
+
   void setProjectionMatrix(int winW, int winH);
   void setViewMatrix();
   void mouseClick(int button, int state, int x, int y, int winW, int winH);
@@ -73,15 +81,16 @@ public:
   // first-person cam mode
   void CameraPan_fp();
   void CameraRotate_fp(int winW, int winH);
+
   void drawGrid();
   void drawCoordinate();
   void drawCoordinateOnScreen(int winW, int winH);
+
   void drawFrustum();
 
 private:
-  void horizontalRotate();
-  // for focus cam mode
-  void verticalRotate(); // for focus cam mode
+  void horizontalRotate(); // for focus cam mode
+  void verticalRotate();   // for focus cam mode
   void GetCamCS();
   void GetViewFrustum();
 };

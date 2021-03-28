@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 using namespace std;
+
 class ShaderProgram {
 public:
   unsigned int id;
@@ -16,6 +17,7 @@ public:
   ~ShaderProgram(void);
   void create();
   void link(ShaderClass shader);
+
   void use();
 
   // GLuint getAttributeLoc(const GLcharARB* name); // this is called beforre
@@ -32,13 +34,13 @@ public:
   void setFloat3V(const char *name, unsigned int count, const float *floatPtr);
   void setMatrix4fv(const char *name, unsigned int count,
                     const float *floatPtr);
-
   // ... feel free to add more functions to enable the setting of other data
   // types
 
   // setup shader sampler texturre data
   void createDataTexture(unsigned int &pGLTexID, float *pData,
                          unsigned int pMaxWidth, unsigned int pMaxHeight);
+
   void setSampler(const char *sampleName, GLuint textureUnit);
 
 private:

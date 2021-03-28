@@ -5,11 +5,12 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+
 using namespace std;
+
 class ShaderClass {
 public:
   unsigned int id;
-
   // unsigned int vShader, fShader, cShader;
   // GLuint curAttributeLoc;
 public:
@@ -19,8 +20,7 @@ public:
   void destroy();
 
 private:
-  char *loadShaderFile(const char *fn);
-  // load the shader text file
+  char *loadShaderFile(const char *fn); // load the shader text file
   void printShaderInfoLog(
       unsigned int shader_id); // print the shader info log to the console
 };
