@@ -8,12 +8,15 @@ ShaderClass::~ShaderClass(void) {}
 
 void ShaderClass::create(const char *shaderFileName, GLenum targetType) {
   //  target types: GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_COMPUTE_SHADER
+  #ifdef __APPLE__
+  #else
   if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader)
     cout << "Ready for GLSL\n";
   else {
     cout << "No GLSL support\n";
     exit(1);
   }
+  #endif
   char *source = NULL;
   int status;
   if (shaderFileName) {
