@@ -1,4 +1,4 @@
-#version 330 core 
+#version 330 core
 uniform mat4 modelMat;
 uniform mat4 viewMat;
 uniform mat4 projMat;
@@ -12,5 +12,4 @@ void main()
 	vec3 p = aPos + aNorm * offset;
 	gl_Position = projMat * viewMat * modelMat * vec4(p, 1.0);
 	vColor = vec4((aNorm+1.0f)/2.0f, 1.0);
-
 }

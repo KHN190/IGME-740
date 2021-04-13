@@ -2,7 +2,7 @@
 #include <GL/glew.h>
 #include <iostream>
 using namespace std;
-ShaderClass::ShaderClass(void) { id = 0; }
+ShaderClass::ShaderClass(void) { id = 0; ref_count = 0; }
 
 ShaderClass::~ShaderClass(void) {}
 
@@ -10,9 +10,7 @@ void ShaderClass::create(const char *shaderFileName, GLenum targetType) {
   //  target types: GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_COMPUTE_SHADER
   #ifdef __APPLE__
   #else
-  if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader)
-    cout << "Ready for GLSL\n";
-  else {
+  if (!GLEW_ARB_vertex_shader || !GLEW_ARB_fragment_shader) {
     cout << "No GLSL support\n";
     exit(1);
   }
@@ -28,6 +26,8 @@ void ShaderClass::create(const char *shaderFileName, GLenum targetType) {
     id = glCreateShader(targetType);
     glShaderSource(id, 1, const_cast<const GLchar **>(&source), NULL);
     glCompileShader(id);
+    ref_count++;
+    cout << "  shader id: " << id << ", ref: " << ref_count << endl;
 
     glGetShaderiv(id, GL_COMPILE_STATUS, &status);
     if (status != GL_TRUE) {
@@ -53,7 +53,13 @@ void ShaderClass::create(const char *shaderFileName, GLenum targetType) {
 
 // delete the shader after it's linked into a sahder program id, as it's no
 // longer needed
-void ShaderClass::destroy() { glDeleteShader(id); }
+void ShaderClass::destroy() {
+  ref_count--;
+  if (ref_count == 0)
+  {
+    glDeleteShader(id);
+  }
+}
 
 char *ShaderClass::loadShaderFile(const char *fn) {
   ifstream file;

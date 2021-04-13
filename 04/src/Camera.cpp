@@ -101,6 +101,10 @@ bool Camera::isFPMode() {
   }
 }
 
+vec3 Camera::getEyeVec3() {
+  return vec3(this->eye.x, this->eye.y, this->eye.z);
+}
+
 void Camera::setProjectionMatrix(int winW, int winH) {
   aspect = (float)winW / (float)winH;
   projMat = perspective(radians(fovy), aspect, near_plane, far_plane);

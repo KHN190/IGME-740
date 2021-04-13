@@ -116,6 +116,7 @@ void Mesh::prepareVBOandShaders(const char *v_shader_file,
 void Mesh::create(const char *filename, const char *v_shader_file,
                   const char *f_shader_file) {
 
+  cout<< "creating mesh\n";
   vector<vec3> ori_vertices;
   vector<uvec3> ori_triangles;
 
@@ -165,17 +166,19 @@ void Mesh::create(const char *filename, const char *v_shader_file,
   // Use arrays to store vertices and triangles, instead of using c++ vectors.
   // This is because we have to use arrays when sending data to GPUs.
   for (uint i = 0; i < vert_num; i++) {
-    vertices[i] = ori_vertices[i];
+    this->vertices[i] = ori_vertices[i];
   }
   for (uint i = 0; i < tri_num; i++) {
-    triangles[i] = ori_triangles[i];
+    this->triangles[i] = ori_triangles[i];
   }
 
   computeNormals();
+  cout << "  normals created.\n";
   prepareVBOandShaders(v_shader_file, f_shader_file);
+  cout << "  shaders created.\n";
 }
 
-void Mesh::draw(mat4 viewMat, mat4 projMat, vec3 lightPos, float time) {
+void Mesh::draw(mat4 viewMat, mat4 projMat, vec3 trans, vec3 lightPos0, vec3 lightPos1, vec3 viewPos, float time, bool wireframe=false, float sc=0.5f) {
 
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
@@ -186,18 +189,21 @@ void Mesh::draw(mat4 viewMat, mat4 projMat, vec3 lightPos, float time) {
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_LIGHTING);
   glEnable(GL_CULL_FACE);
-  glPolygonMode(GL_FRONT, GL_FILL);
+  if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  else glPolygonMode(GL_FRONT, GL_FILL);
 
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
 
   glUseProgram(shaderProg.id);
-  mat4 m = translate(mat4(1.0), vec3(0.0f, 2.0f, 0.0f));
-  modelMat = scale(m, vec3(0.3f, 0.3f, 0.3f));
+  mat4 m = translate(mat4(1.0), trans);
+  modelMat = scale(m, vec3(sc, sc, sc));
   shaderProg.setMatrix4fv("modelMat", 1, value_ptr(modelMat));
   shaderProg.setMatrix4fv("viewMat", 1, value_ptr(viewMat));
   shaderProg.setMatrix4fv("projMat", 1, value_ptr(projMat));
-  shaderProg.setFloat3V("lightPos", 1, value_ptr(lightPos));
+  shaderProg.setFloat3V("lightPos0", 1, value_ptr(lightPos0));
+  shaderProg.setFloat3V("lightPos1", 1, value_ptr(lightPos1));
+  shaderProg.setFloat3V("viewPos", 1, value_ptr(viewPos));
   shaderProg.setFloat("time", time);
   shaderProg.setFloat("offset", normal_offset);
 

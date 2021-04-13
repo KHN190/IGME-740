@@ -68,6 +68,8 @@ public:
   void mouseMotion(int x, int y, int winW, int winH);
   void keyOperation(const unsigned char keyStates[], int winW, int winH);
 
+  vec3 getEyeVec3();
+
   // cam mode
   void switchCamMode();
   bool isFocusMode();
