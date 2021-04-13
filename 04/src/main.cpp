@@ -41,8 +41,8 @@ Text g_text;
 unsigned char g_keyStates[256];
 
 #ifdef __APPLE__
-char v_shader_file[] = "./shaders/basic.vert";
-char f_shader_file[] = "./shaders/basic.frag";
+char v_shader_file[] = "./shaders/perVert_lambert.vert";
+char f_shader_file[] = "./shaders/perVert_lambert.frag";
 #endif
 
 #ifdef __linux__
