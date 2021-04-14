@@ -62,7 +62,14 @@ private:
 public:
   ParticleSystem();
   ~ParticleSystem();
+
   void create(unsigned int num_x, unsigned int num_y,
+              vec3 min_point, vec3 max_point,
+              const char *compute_shader_file,
+              const char *vertex_shader_file,
+              const char *fragment_shader_file);
+
+  void recreate(unsigned int num_x, unsigned int num_y,
               vec3 min_point, vec3 max_point,
               const char *compute_shader_file,
               const char *vertex_shader_file,

@@ -18,6 +18,12 @@
 using namespace std;
 using namespace glm;
 
+int max_width = 8192;
+int min_width = 16;
+
+int res_width = 1024 * 2;
+int res_height = 512 * 2;
+
 int g_winWidth = 1024;
 int g_winHeight = 512;
 
@@ -38,9 +44,16 @@ vec3 origin = vec3(0.0, 5.0, 20.0);
 vec3 wire_pos = vec3(0.0, 5.0, -8.0);
 float wire_radius = 2.0;
 
+// requirement 5: adjust resolution
+void redraw() {
+	std::cout << "redraw particle system: " << res_width << ", " << res_height << '\n';
+	parSys.recreate(res_width + 1, res_height + 1, vec3(-10.0f, 0.0f, -5.0f), vec3(10.0f, 10.0f, -5.0f),
+                c_shader_file, v_shader_file, f_shader_file);
+}
+
 void initialization() {
 	// requirement 1: particle system creation
-  parSys.create(65, 33, vec3(-10.0f, 0.0f, -5.0f), vec3(10.0f, 10.0f, -5.0f),
+  parSys.create(res_width + 1, res_height + 1, vec3(-10.0f, 0.0f, -5.0f), vec3(10.0f, 10.0f, -5.0f),
                 c_shader_file, v_shader_file, f_shader_file);
 
   g_cam.set(38.0f, 13.0f, 4.0f, 0.0f, 0.0f, 0.0f, g_winWidth, g_winHeight,
@@ -82,7 +95,8 @@ void display() {
   glUseProgram(0);
   glDisable(GL_LIGHTING);
   glEnable(GL_DEPTH_TEST);
-  parSys.draw(5.0f, g_cam.viewMat, g_cam.projMat);
+	float particle_size = 512.0f / g_winWidth;
+  parSys.draw(particle_size, g_cam.viewMat, g_cam.projMat);
 
   g_cam.drawGrid();
   g_cam.drawCoordinateOnScreen(g_winWidth, g_winHeight);
@@ -133,6 +147,12 @@ void display() {
     g_text.draw(10, 30, const_cast<char *>(str.c_str()), g_winWidth,
                 g_winHeight);
   }
+
+	{
+		string str = "resolution: " + to_string(res_width) + ", " + to_string(res_height);
+		g_text.draw(10, 60, const_cast<char *>(str.c_str()), g_winWidth,
+								g_winHeight);
+	}
 
   glPopMatrix();
   glutSwapBuffers();
@@ -189,6 +209,13 @@ void keyboard(unsigned char key, int x, int y) {
 	case 'j':
 		wire_pos[0] -= 0.1;
 		break;
+	// adjust resolution
+	// case '+':
+	// 	if (res_width < max_width) { res_width *= 2; res_height *= 2; redraw(); }
+	// 	break;
+	// case '-':
+	// 	if (res_width > min_width) { res_width /= 2; res_height /= 2; redraw(); }
+	// 	break;
   }
 }
 

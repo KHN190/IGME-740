@@ -55,6 +55,29 @@ float ParticleSystem::lerp(float x, float y, float ratio) {
 	return x * ratio + y * (1 - ratio);
 }
 
+void ParticleSystem::recreate(unsigned int num_x,
+													  unsigned int num_y,
+														vec3 min_point,
+                            vec3 max_point,
+														const char *compute_shader_file,
+                            const char *vertex_shader_file,
+                            const char *fragment_shader_file) {
+  // delete[] pos_array;
+  // delete[] dir_array;
+  // delete[] speed_array;
+  // delete[] color_array;
+  pos_array = NULL;
+  dir_array = NULL;
+  speed_array = NULL;
+  color_array = NULL;
+  std::cout << "particle system destroyed" << '\n';
+
+  create(num_x, num_y, min_point, max_point,
+    compute_shader_file,
+    vertex_shader_file,
+    fragment_shader_file);
+}
+
 void ParticleSystem::create(unsigned int num_x,
 													  unsigned int num_y,
 														vec3 min_point,
