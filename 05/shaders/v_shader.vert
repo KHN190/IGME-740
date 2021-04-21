@@ -1,7 +1,7 @@
 #version 430
 
-uniform mat4 viewMat; 
-uniform mat4 projMat; 
+uniform mat4 viewMat;
+uniform mat4 projMat;
 
 layout(location = 0) in vec4 vertex_position;
 layout(location = 1) in vec4 vertex_colour;
@@ -13,7 +13,3 @@ void main() {
   //gl_Position = gl_ModelViewProjectionMatrix * vertex_position;
   gl_Position = projMat * viewMat * vertex_position;
 }
-
-
-
-

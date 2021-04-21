@@ -1,0 +1,98 @@
+#version 430 compatibility
+
+uniform float deltaT;
+uniform vec3 minPos;
+uniform vec3 maxPos;
+uniform vec3 origin;
+uniform vec3 wirePos;
+uniform float wireRadius;
+
+// particle position
+layout (std430, binding = 4) buffer Pos
+{
+	vec4 Positions [ ];
+};
+// particle direction
+layout (std430, binding = 5) buffer Dir
+{
+	vec4 Directions [ ];
+};
+// particle color
+layout (std430, binding = 6) buffer Col
+{
+	vec4 Colors [ ];
+};
+// particle speed
+layout (std430, binding = 7) buffer Speed
+{
+	float Speeds [ ];
+};
+
+layout (local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
+
+// test ray intersect with sphere
+bool intersect(vec3 origin, vec3 wirePos, float wireRadius, vec3 pos) {
+	vec4 ray = vec4(normalize(pos - origin), 0.0);
+	vec4 pivot = vec4(normalize(wirePos - origin), 0.0);
+
+	float dist = distance(wirePos, origin);
+	return tan(acos(dot(ray, pivot))) * dist <= wireRadius;
+}
+
+void main()
+{
+	const vec3 G = vec3 (0.0f, -9.8f, 0.0f);
+	uint g_id = gl_GlobalInvocationID.x;
+
+	vec3 pos = Positions[g_id].xyz;
+	vec3 dir = Directions[g_id].xyz;
+	float speed = Speeds[g_id];
+
+	// update position using speed & time
+	pos += dir * speed * 0.000000001 * deltaT;
+
+	if(pos.x <minPos.x)
+	{
+		pos.x = minPos.x;
+		dir.x = abs(dir.x);
+	}
+	else if(pos.x > maxPos.x)
+	{
+		pos.x = maxPos.x;
+		dir.x = -abs(dir.x);
+	}
+
+	if(pos.y <minPos.y)
+	{
+		pos.y = minPos.y;
+		dir.y = abs(dir.y);
+	}
+	else if(pos.y > maxPos.y)
+	{
+		pos.y = maxPos.y;
+		dir.y = -abs(dir.y);
+	}
+
+	if(pos.z <minPos.z)
+	{
+		pos.z = minPos.z;
+		dir.z = abs(dir.z);
+	}
+	else if(pos.z > maxPos.z)
+	{
+		pos.z = maxPos.z;
+		dir.z = -abs(dir.z);
+	}
+
+	normalize(dir);
+
+	Positions[g_id].xyz = pos;
+	Directions[g_id].xyz = dir;
+
+	// update colors
+	vec4 color = Colors[g_id];
+	// if ray intersect with sphere and this particle
+	if (intersect(origin, wirePos, wireRadius, pos.xyz)) color = vec4(0.0, 0.8, 0.9, 1.0);
+	else color = vec4(0.0, 0.0, 0.5, 1.0);
+	Colors[g_id] = color;
+}
