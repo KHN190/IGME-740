@@ -13,11 +13,11 @@ public:
     vec4			eye;
     vec4			lookat;
 
-	mat4			mvMat;
+	  mat4			mvMat;
     mat4			projMat;
 
 private:
-    float           fovy;              // view angle 
+    float           fovy;              // view angle
     float           aspect;            // the window ration equal to w/h
     float           near_plane;
     float           far_plane;
@@ -33,11 +33,11 @@ private:
 
     vec2			key_pos;           // the translated step changed by keyboard operation in FP cam mode
     vec2			key_pre_pos;
-    bool            m_altKey;          // detect if ALT pressed 
+    bool            m_altKey;          // detect if ALT pressed
 
-    
+
     int m_mode;
-	
+
     // View Frustum
 	vec4	     ntl;	          // the near-top-left
 	vec4         ntr;	          // the near-top-right
@@ -54,12 +54,12 @@ private:
 	float M_PAN_PAR_FP;
 	float M_ROTATE_PAR_FP;
 
-public: 
+public:
 	Camera();
 	~Camera();
 	void PrintProperty();
-	void set(float eye_x, float eye_y, float eye_z, 
-			 float lookat_x, float lookat_y, float lookat_z, 
+	void set(float eye_x, float eye_y, float eye_z,
+			 float lookat_x, float lookat_y, float lookat_z,
              int winW, int winH,
 			 float p_angle = 45.0f, float p_near =0.1f, float p_far=10000.0f);
 
@@ -74,7 +74,7 @@ public:
 	bool isFocusMode();
 	bool isFPMode();
 
-	// third person model 
+	// third person model
 	void CameraRotate();
 	void CameraZoom();
 	void CameraPan();
@@ -95,7 +95,7 @@ public:
 	// function to see if camera is changed
 	bool IsChanged();
 
-private: 
+private:
     void horizontalRotate();    // for focus cam mode
 	void verticalRotate();      // for focus cam mode
     void GetCamCS();

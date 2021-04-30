@@ -18,7 +18,7 @@ Camera:: Camera()
 {
     eye = vec4(0.0f, 0.0f, 0.0f, 1.0f);
     lookat = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-    
+
     axis_n = vec4(0.0f);
     axis_u = vec4(0.0f);
     axis_v = vec4(0.0f);
@@ -30,7 +30,7 @@ Camera:: Camera()
 
     world_up = vec4(0.0f, 1.0f, 0.0f, 0.0f);
 
-	m_mode      = CAM_FOCUS;
+    m_mode      = CAM_FOCUS;
 
     mouse_pos = vec2(0.0f);
     mouse_pre_pos = vec2(0.0f);
@@ -38,7 +38,7 @@ Camera:: Camera()
 
     key_pos = vec2(0.0f);
     key_pre_pos = vec2(0.0f, 0.0f);
-	m_altKey     = false;
+	  m_altKey     = false;
 
 	M_ZOOM_PAR   = 0.03f;
 	M_PAN_PAR    = 50.0f;
@@ -69,14 +69,14 @@ void Camera::PrintProperty()
 
 }
 
-void Camera::set(float eye_x, float eye_y, float eye_z, 
+void Camera::set(float eye_x, float eye_y, float eye_z,
 				 float lookat_x, float lookat_y, float lookat_z,
 				 int winW, int winH,
 				 float p_angle, float p_near, float p_far)
 {
 	eye = vec4(eye_x, eye_y, eye_z, 1.0f);
 	lookat = vec4(lookat_x, lookat_y, lookat_z, 1.0f);
-	
+
 	fovy        = p_angle;
 	near_plane  = p_near;
 	far_plane   = p_far;
@@ -87,7 +87,7 @@ void Camera::set(float eye_x, float eye_y, float eye_z,
     GetViewFrustum();
 }
 
-void Camera::switchCamMode() 
+void Camera::switchCamMode()
 {
     m_mode = (m_mode == CAM_FOCUS) ? CAM_FP : CAM_FOCUS;
 }
@@ -133,7 +133,7 @@ void Camera::mouseClick(int button, int state, int x, int y, int winW, int winH)
         return;
     }
 	mouse_button = (state == GLUT_DOWN) ? button : 0;
-    
+
 	if( m_mode == CAM_FP) {
 		if(mouse_button == GLUT_MIDDLE_BUTTON) {
 			mouse_pos = vec2((float)x, -(float)y);
@@ -141,7 +141,7 @@ void Camera::mouseClick(int button, int state, int x, int y, int winW, int winH)
 		}
 	} else if(m_mode == CAM_FOCUS) {
         mouse_pos = vec2(x/(float)winW - 1.0f, (winH-y)/(float)winH - 1.0f);
-		mouse_pre_pos = mouse_pos; 
+		mouse_pre_pos = mouse_pos;
         m_altKey = (glutGetModifiers() == GLUT_ACTIVE_ALT);
 	}
 
@@ -154,13 +154,13 @@ void Camera::mouseMotion(int x, int y, int winW, int winH)
         return;
     }
 
-	if( m_mode == CAM_FP){	
+	if( m_mode == CAM_FP){
 		if(mouse_button == GLUT_LEFT_BUTTON) {
 			mouse_pos = vec2((float)x, -(float)y);
 			CameraRotate_fp(winW, winH);
 			mouse_pre_pos = mouse_pos;
 		}
-	} 
+	}
 	else if( m_mode == CAM_FOCUS){
 		mouse_pos = vec2(x/(float)winW - 1.0f, (winH-y)/(float)winH - 1.0f);
 		if (m_altKey){
@@ -197,7 +197,7 @@ void Camera::keyOperation(const unsigned char keyStates[], int winW, int winH)
         setModelView();
         glViewport(0, 0, winW, winH);
 		glutPostRedisplay();
-        key_pre_pos.x = key_pos.x; 
+        key_pre_pos.x = key_pos.x;
     }
     if(keyStates['d']) {
        	key_pos.x+=speed;
@@ -206,7 +206,7 @@ void Camera::keyOperation(const unsigned char keyStates[], int winW, int winH)
         setModelView();
         glViewport(0, 0, winW, winH);
 		glutPostRedisplay();
-        key_pre_pos.x = key_pos.x; 
+        key_pre_pos.x = key_pos.x;
     }
     if(keyStates['w']) {
        	key_pos.y-=speed;
@@ -215,7 +215,7 @@ void Camera::keyOperation(const unsigned char keyStates[], int winW, int winH)
         setModelView();
         glViewport(0, 0, winW, winH);
 		glutPostRedisplay();
-        key_pre_pos.y = key_pos.y; 
+        key_pre_pos.y = key_pos.y;
     }
     if(keyStates['s']) {
        	key_pos.y+=speed;
@@ -224,7 +224,7 @@ void Camera::keyOperation(const unsigned char keyStates[], int winW, int winH)
         setModelView();
         glViewport(0, 0, winW, winH);
 		glutPostRedisplay();
-        key_pre_pos.y = key_pos.y; 
+        key_pre_pos.y = key_pos.y;
     }
 }
 
@@ -242,7 +242,7 @@ void Camera::drawGrid()
 	//glScalef(30.0f, 30.0f, 30.0f);
 	glBegin(GL_LINES);
 	for (int i =0; i<size+1; i++) {
-        if((float)i == size/2.0f) { 
+        if((float)i == size/2.0f) {
             glColor3f(0.0f, 0.0f, 0.0f);
         } else {
             glColor3f(0.8f, 0.8f, 0.8f);
@@ -265,11 +265,11 @@ void Camera::drawCoordinate()
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	//glScalef(40.0f, 40.0f, 40.0f);
-	
+
 	glLineWidth(2.5f);
 	glBegin(GL_LINES);
 
-	//axis x	
+	//axis x
 	glColor3f(1.0f, 0.0f, 0.0f);
 	glVertex3f(0.0f, 0.0f, 0.0f);
 	glVertex3f(0.3f, 0.0f, 0.0f);
@@ -279,12 +279,12 @@ void Camera::drawCoordinate()
 	glVertex3f(0.5f, -0.05f, 0.0f);
 	glVertex3f(0.4f, -0.05f, 0.0f);
 	glVertex3f(0.5f, 0.05f, 0.0f);
-	
+
 	//axis y
 	glColor3f(0.0f, 1.0f, 0.0f);
 	glVertex3f(0.0f, 0.0f, 0.0f);
 	glVertex3f(0.0f, 0.3f, 0.0f);
-	
+
     //text y
     glVertex3f(0.0f, 0.5f, 0.0f);
 	glVertex3f(0.0f, 0.4f, 0.0f);
@@ -292,12 +292,12 @@ void Camera::drawCoordinate()
 	glVertex3f(0.0f, 0.5f, 0.0f);
 	glVertex3f(0.05f, 0.55f, 0.0f);
 	glVertex3f(0.0f, 0.5f, 0.0f);
-	
+
 	//axis z
 	glColor3f(0.0f, 0.0f, 1.0f);
 	glVertex3f(0.0f, 0.0f, 0.0f);
 	glVertex3f(0.0f, 0.0f, 0.3f);
-	
+
     //text z
     glVertex3f(-0.025f, 0.025f, 0.4f);
 	glVertex3f(0.025f, 0.025f, 0.4f);
@@ -305,7 +305,7 @@ void Camera::drawCoordinate()
 	glVertex3f(-0.025f, -0.025f, 0.4f);
 	glVertex3f(-0.025f, -0.025f, 0.4f);
 	glVertex3f(0.025f, -0.025f, 0.4f);
-	
+
     glEnd();
 	glLineWidth(1.0f);
 
@@ -331,7 +331,7 @@ void Camera::drawCoordinateOnScreen(int winW, int winH)
     glPushMatrix();
     glLoadIdentity();
 	gluOrtho2D(-1.0f, 1.0f, -1.0f, 1.0f);
-    
+
     glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
     glLoadIdentity();
@@ -423,11 +423,11 @@ void Camera :: verticalRotate()
     mat = translate(mat, -vec3(lookat));
 
     eye = mat*eye;
-    
+
     vec4 v1 = vec4(cross(vec3(world_up), vec3(axis_u)), 0.0f);
     vec4 v2 = eye - lookat;
     if(dot(v2,v1) > 0.0f ) {
-        world_up.y = (world_up.y == 1.0f) ? -1.0f : 1.0f; 
+        world_up.y = (world_up.y == 1.0f) ? -1.0f : 1.0f;
     }
 }
 
@@ -447,10 +447,10 @@ void Camera :: CameraZoom()
 
 	if(dir > 0.0f) {
 		eye += eye * M_ZOOM_PAR;
-		//lookat += eye * M_ZOOM_PAR; //this makes the lookat move along eye-lookat 
+		//lookat += eye * M_ZOOM_PAR; //this makes the lookat move along eye-lookat
 	} else {
 		eye -= eye * M_ZOOM_PAR;
-		//lookat -= eye * M_ZOOM_PAR; //this makes the lookat move along eye-lookat 
+		//lookat -= eye * M_ZOOM_PAR; //this makes the lookat move along eye-lookat
 	}
 	eye += lookat;
 
@@ -459,11 +459,11 @@ void Camera :: CameraZoom()
 }
 
 void Camera :: CameraPan()
-{	
+{
 	eye.x += M_PAN_PAR*(mvMat[0][0]*(mouse_pre_pos.x-mouse_pos.x) + mvMat[0][1]*(mouse_pre_pos.y-mouse_pos.y));
 	eye.y += M_PAN_PAR*(mvMat[1][0]*(mouse_pre_pos.x-mouse_pos.x) + mvMat[1][1]*(mouse_pre_pos.y-mouse_pos.y));
 	eye.z += M_PAN_PAR*(mvMat[2][0]*(mouse_pre_pos.x-mouse_pos.x) + mvMat[2][1]*(mouse_pre_pos.y-mouse_pos.y));
-	
+
 	lookat.x += M_PAN_PAR*(mvMat[0][0]*(mouse_pre_pos.x-mouse_pos.x) + mvMat[0][1]*(mouse_pre_pos.y-mouse_pos.y));
 	lookat.y += M_PAN_PAR*(mvMat[1][0]*(mouse_pre_pos.x-mouse_pos.x) + mvMat[1][1]*(mouse_pre_pos.y-mouse_pos.y));
 	lookat.z += M_PAN_PAR*(mvMat[2][0]*(mouse_pre_pos.x-mouse_pos.x) + mvMat[2][1]*(mouse_pre_pos.y-mouse_pos.y));
@@ -477,7 +477,7 @@ void Camera :: CameraPan_fp()
 	eye.x += M_PAN_PAR_FP*(mvMat[0][0]*(key_pos.x-key_pre_pos.x) + mvMat[0][2]*(key_pos.y-key_pre_pos.y));
 	eye.y += M_PAN_PAR_FP*(mvMat[1][0]*(key_pos.x-key_pre_pos.x) + mvMat[1][2]*(key_pos.y-key_pre_pos.y));
 	eye.z += M_PAN_PAR_FP*(mvMat[2][0]*(key_pos.x-key_pre_pos.x) + mvMat[2][2]*(key_pos.y-key_pre_pos.y));
-	
+
 	lookat.x += M_PAN_PAR_FP*(mvMat[0][0]*(key_pos.x-key_pre_pos.x) + mvMat[0][2]*(key_pos.y-key_pre_pos.y));
 	lookat.y += M_PAN_PAR_FP*(mvMat[1][0]*(key_pos.x-key_pre_pos.x) + mvMat[1][2]*(key_pos.y-key_pre_pos.y));
 	lookat.z += M_PAN_PAR_FP*(mvMat[2][0]*(key_pos.x-key_pre_pos.x) + mvMat[2][2]*(key_pos.y-key_pre_pos.y));
@@ -506,7 +506,7 @@ void Camera::CameraRotate_fp(int winW, int winH)
     v = normalize(v);
 	v *= len;
 	lookat = eye + v;
-    
+
 	GetCamCS();
 	GetViewFrustum();
 }
@@ -557,7 +557,7 @@ void Camera::GetViewFrustum()
 	float fh = 2.0f*far_plane*tang;		// far-plane height
 	float fw = fh*aspect;			    // far-plane width
 
-	//compute the 8 conners of the frustum 
+	//compute the 8 conners of the frustum
 	ntl = nc + axis_v*nh*0.5f - axis_u*nw*0.5f;
 	ntr = nc + axis_v*nh*0.5f + axis_u*nw*0.5f;
 	nbl = nc - axis_v*nh*0.5f - axis_u*nw*0.5f;
