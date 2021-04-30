@@ -14,6 +14,7 @@
 #include "Sphere.h"
 #include "Box.h"
 #include "Light.h"
+#include "Shader.h"
 
 #include "Text.h"
 
@@ -40,7 +41,7 @@ unsigned int g_box_num;
 Box* g_boxes;
 
 unsigned int g_sphere_num;
-Sphere * g_spheres;
+Sphere* g_spheres;
 
 Light g_light;
 
@@ -50,7 +51,7 @@ void LoadConfigFile(const char* pFilePath)
     const unsigned int LIGHT= 1;
     const unsigned int SPHERE= 2;
     const unsigned int BOX = 3;
-    
+
     vec3 rot;
     fstream filestr;
     filestr.open (pFilePath, fstream::in);
@@ -59,11 +60,11 @@ void LoadConfigFile(const char* pFilePath)
         filestr.close();
         return;
     }
-    
+
     char objType[80];
     char attrType[80];
     unsigned int objState = -1;
-    
+
     bool loop = true;
     while(loop){
         filestr>>objType;
@@ -76,7 +77,7 @@ void LoadConfigFile(const char* pFilePath)
                 float e_x, e_y, e_z;
                 float l_x, l_y, l_z;
                 float near_plane;
-                
+
                 for(int i=0; i<3; i++){
                     filestr>>attrType;
                     if(!strcmp(attrType, "eye:")){
@@ -117,7 +118,7 @@ void LoadConfigFile(const char* pFilePath)
                     filestr>>g_sphere_num;
                 if(g_sphere_num > 0) {
                     g_spheres = new Sphere[g_sphere_num];
-                    
+
                     for(int i=0; i<g_sphere_num; i++){
                     filestr>>attrType;
                     if(!strcmp(attrType, "position:")){
@@ -132,12 +133,12 @@ void LoadConfigFile(const char* pFilePath)
                         filestr>>g_spheres[i].color.x; filestr>>g_spheres[i].color.y;  filestr>>g_spheres[i].color.z;
                     }
                     filestr>>attrType;
-                    if(!strcmp(attrType, "ambient:"))	filestr>>g_spheres[i].ambient;
+                    if(!strcmp(attrType, "ambient:"))    filestr>>g_spheres[i].ambient;
                     filestr>>attrType;
-                    if(!strcmp(attrType, "diffuse:"))	filestr>>g_spheres[i].diffuse;
+                    if(!strcmp(attrType, "diffuse:"))    filestr>>g_spheres[i].diffuse;
                     filestr>>attrType;
-                    if(!strcmp(attrType, "phong:")) 	filestr>>g_spheres[i].phong;
-                    
+                    if(!strcmp(attrType, "phong:"))     filestr>>g_spheres[i].phong;
+
                 }
                 }
                 break;
@@ -145,7 +146,7 @@ void LoadConfigFile(const char* pFilePath)
                 filestr>>attrType;
                 if(!strcmp(attrType, "num:"))
                     filestr>>g_box_num;
-                
+
                 if(g_box_num > 0) {
                     g_boxes = new Box[g_box_num];
                     for(int i=0; i<g_box_num; i++){
@@ -158,7 +159,7 @@ void LoadConfigFile(const char* pFilePath)
                             filestr>>g_boxes[i].maxPos.y;
                             filestr>>g_boxes[i].maxPos.z;
                         }
-                        
+
                         filestr>>attrType;
                         if(!strcmp(attrType, "color:")){
                             filestr>>g_boxes[i].color.x;
@@ -170,30 +171,30 @@ void LoadConfigFile(const char* pFilePath)
                             filestr>>rot.x;
                             filestr>>rot.y;
                             filestr>>rot.z;
-							//Convert to radians
-							rot.x *= 3.14159265f / 180.0f;
-							rot.y *= 3.14159265f / 180.0f;
-							rot.z *= 3.14159265f / 180.0f;
+                            //Convert to radians
+                            rot.x *= 3.14159265f / 180.0f;
+                            rot.y *= 3.14159265f / 180.0f;
+                            rot.z *= 3.14159265f / 180.0f;
 
                             mat4 m (1.0f);
-                            
-                            
+
+
                             // rotation order is zyx
                             m = rotate(m, rot.z, vec3(0, 0, 1));
                             m = rotate(m, rot.y, vec3(0, 1, 0));
                             m = rotate(m, rot.x, vec3(1, 0, 0));
-                            
+
                             //cout<<glm::to_string(m)<<endl;
-                            
+
                             g_boxes[i].rotMat = m;
                             g_boxes[i].invRotMat = inverse(m);
                         }
                         filestr>>attrType;
-                        if(!strcmp(attrType, "ambient:"))	filestr>>g_boxes[i].ambient;
+                        if(!strcmp(attrType, "ambient:"))    filestr>>g_boxes[i].ambient;
                         filestr>>attrType;
-                        if(!strcmp(attrType, "diffuse:"))	filestr>>g_boxes[i].diffuse;
+                        if(!strcmp(attrType, "diffuse:"))    filestr>>g_boxes[i].diffuse;
                         filestr>>attrType;
-                        if(!strcmp(attrType, "phong:"))	filestr>>g_boxes[i].phong;
+                        if(!strcmp(attrType, "phong:"))    filestr>>g_boxes[i].phong;
                     }
                     loop = false;
                 }
@@ -202,65 +203,129 @@ void LoadConfigFile(const char* pFilePath)
     }
 }
 
-void initialization() 
-{    
+void ConfigureShaderAndMatrices()
+{
+    // orthographic projection
+    float near_plane = 1.0f, far_plane = 7.5f;
+    glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+
+    // look at scene's center
+    glm::mat4 lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f),
+                                      glm::vec3( 0.0f, 0.0f,  0.0f),
+                                      glm::vec3( 0.0f, 1.0f,  0.0f));
+    glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+
+
+
+    // depthShader.use();
+    // glUniformMatrix4fv(lightSpaceMatrixLocation, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+    //
+    // glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+    // glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    //     glClear(GL_DEPTH_BUFFER_BIT);
+    //     // RenderScene(depthShader);
+    // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void initialization()
+{
     //g_cam.set(3.0f, 4.0f, 3.0f, 0.0f, 0.0f, 0.0f, g_winWidth, g_winHeight);
 
     LoadConfigFile(dataFile);
-    
-	g_text.setColor(0.0f, 0.0f, 0.0f);
+
+    g_text.setColor(0.0f, 0.0f, 0.0f);
 }
 
 /****** GL callbacks ******/
 void initialGL()
-{    
-	glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, light0_Amb);
-	glLightfv(GL_LIGHT0, GL_POSITION, light0_Diff);
-	glLightfv(GL_LIGHT0, GL_POSITION, light0_Spec);
+{
+    glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, light0_Amb);
+    glLightfv(GL_LIGHT0, GL_POSITION, light0_Diff);
+    glLightfv(GL_LIGHT0, GL_POSITION, light0_Spec);
 
 
-	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
-	glPolygonMode(GL_FRONT, GL_FILL);
+    glPolygonMode(GL_FRONT, GL_FILL);
 
-	
-	glClearColor (1.0f, 1.0f, 1.0f, 0.0f);
-	glShadeModel(GL_SMOOTH);
 
-	glMatrixMode(GL_PROJECTION);
+    glClearColor (1.0f, 1.0f, 1.0f, 0.0f);
+    glShadeModel(GL_SMOOTH);
+
+    glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-	
-	glMatrixMode (GL_MODELVIEW);
-	glLoadIdentity();
+
+    glMatrixMode (GL_MODELVIEW);
+    glLoadIdentity();
 }
 
 void idle()
 {
     // adding stuff to update at runtime ....
-    
+
     g_cam.keyOperation(g_keyStates, g_winWidth, g_winHeight);
 }
 
 void display()
 {
-    //glFinish();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-	glEnable(GL_LIGHTING);
-	glLightfv(GL_LIGHT0, GL_POSITION, light0_pos); // commenting out this line to make object always lit up in front of the cam. 
 
-    // adding stuff to draw ...
+    glEnable(GL_LIGHTING);
+    // glLightfv(GL_LIGHT0, GL_POSITION, light0_pos); // commenting out this line to make object always lit up in front of the cam.
 
-    
-    // drae sphere and box
+
+
+    // generate depth buffer
+    unsigned int depthMapFBO;
+    glGenFramebuffers(1, &depthMapFBO);
+
+    unsigned int depthMap;
+    glGenTextures(1, &depthMap);
+
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+                 g_winWidth, g_winHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+
+
+    // render to depth map
+    glViewport(0, 0, g_winWidth, g_winHeight);
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    ConfigureShaderAndMatrices();
+    // RenderScene();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    // then render scene as normal with shadow mapping (using depth map)
+    glViewport(0, 0, g_winWidth, g_winHeight);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // ConfigureShaderAndMatrices();
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    // RenderScene();
+
+
+
+    // draw sphere and box
     for (int i=0; i<g_sphere_num; i++)
-        g_spheres[i].Draw();
+        g_spheres[i].Draw(light0_pos, g_cam);
     for (int i=0; i<g_box_num; i++)
         g_boxes[i].Draw();
 
@@ -269,29 +334,29 @@ void display()
     g_cam.drawCoordinateOnScreen(g_winWidth, g_winHeight);
     g_cam.drawCoordinate();
 
-	// displaying the text
-	if(g_cam.isFocusMode()) {
+    // displaying the text
+    if(g_cam.isFocusMode()) {
         string str = "Cam mode: Focus";
-		g_text.draw(10, 30, const_cast<char*>(str.c_str()), g_winWidth, g_winHeight);
-	} else if(g_cam.isFPMode()) {
+        g_text.draw(10, 30, const_cast<char*>(str.c_str()), g_winWidth, g_winHeight);
+    } else if(g_cam.isFPMode()) {
         string str = "Cam mode: FP";
-		g_text.draw(10, 30, const_cast<char*>(str.c_str()), g_winWidth, g_winHeight);
-	}
+        g_text.draw(10, 30, const_cast<char*>(str.c_str()), g_winWidth, g_winHeight);
+    }
 
-	char s[128];
-	g_text.draw(10, 50, s, g_winWidth, g_winHeight);
+    char s[128];
+    g_text.draw(10, 50, s, g_winWidth, g_winHeight);
 
     glutSwapBuffers();
 }
 
 void reshape(int w, int h)
 {
-	g_winWidth = w;
-	g_winHeight = h;
-	if (h == 0) {
-		h = 1;
-	}
-	g_cam.setProj(g_winWidth, g_winHeight);
+    g_winWidth = w;
+    g_winHeight = h;
+    if (h == 0) {
+        h = 1;
+    }
+    g_cam.setProj(g_winWidth, g_winHeight);
     g_cam.setModelView();
     glViewport(0, 0, w, h);
 }
@@ -299,7 +364,7 @@ void reshape(int w, int h)
 void mouse(int button, int state, int x, int y)
 {
     g_cam.mouseClick(button, state, x, y, g_winWidth, g_winHeight);
-	
+
 }
 
 void motion(int x, int y)
@@ -315,43 +380,43 @@ void keyup(unsigned char key, int x, int y)
 void keyboard(unsigned char key, int x, int y)
 {
     g_keyStates[key] = true;
-	switch(key) { 
-		case 27:
-			exit(0);
-			break;
+    switch(key) {
+        case 27:
+            exit(0);
+            break;
         case 'c': // switch cam control mode
             g_cam.switchCamMode();
-			glutPostRedisplay();
+            glutPostRedisplay();
             break;
         case ' ':
             g_cam.PrintProperty();
             break;
 
-	}
+    }
 }
 
 
-int main(int argc, char **argv) 
+int main(int argc, char **argv)
 {
-	glutInit(&argc, argv);
+    glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(g_winWidth, g_winHeight);
     glutInitWindowPosition(0, 0);
     glutCreateWindow("Ray Casting");
-	
-	glewInit();
-	initialGL();
 
-	glutDisplayFunc(display);
-	glutReshapeFunc(reshape);
-	glutMouseFunc(mouse);
-	glutMotionFunc(motion);
+    glewInit();
+    initialGL();
+
+    glutDisplayFunc(display);
+    glutReshapeFunc(reshape);
+    glutMouseFunc(mouse);
+    glutMotionFunc(motion);
     glutKeyboardUpFunc(keyup);
     glutKeyboardFunc(keyboard);
-	glutIdleFunc(idle);
+    glutIdleFunc(idle);
 
-	initialization();
-	
+    initialization();
+
     glutMainLoop();
     return EXIT_SUCCESS;
 }
