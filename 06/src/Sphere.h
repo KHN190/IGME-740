@@ -33,7 +33,7 @@ public:
 		/// lightPos, camera
     void Draw(const GLfloat* lightPosf, const Camera &camera)
     {
-			vec3 lightPos = vec3(lightPosf[0], lightPosf[1], lightPosf[2]);
+			// vec3 lightPos = vec3(lightPosf[0], lightPosf[1], lightPosf[2]);
 
 			shader.use();
 			shader.setVec3("objectColor", color.x, color.y, color.z);
@@ -56,20 +56,20 @@ public:
 
 
 
-        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				// glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        // glEnable(GL_DEPTH_TEST);
-        // glDisable(GL_CULL_FACE);
-        // glDisable(GL_LIGHTING);
-				//
-        // glMatrixMode(GL_MODELVIEW);
-        // glPushMatrix();
-        // glTranslatef(pos.x, pos.y, pos.z);
-        // glColor3f(color.x,color.y, color.z);
-        // // glutWireSphere(radius, 10, 10);
-				// glutSolidSphere(radius, 10, 10);
-				//
-        // glPopMatrix();
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glEnable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_LIGHTING);
+
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glTranslatef(pos.x, pos.y, pos.z);
+        glColor3f(color.x,color.y, color.z);
+        // glutWireSphere(radius, 10, 10);
+				glutSolidSphere(radius, 10, 10);
+
+        glPopMatrix();
     };
 };
 
