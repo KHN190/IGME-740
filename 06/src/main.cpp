@@ -345,7 +345,7 @@ void keyboard(unsigned char key, int x, int y)
 int main(int argc, char **argv)
 {
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
+    glutInitDisplayMode(GLUT_3_2_CORE_PROFILE | GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(g_winWidth, g_winHeight);
     glutInitWindowPosition(0, 0);
     glutCreateWindow("Ray Casting");
