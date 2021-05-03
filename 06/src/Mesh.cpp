@@ -114,12 +114,12 @@ void Mesh::prepareVBOandShaders(const char *v_shader_file,
   glEnableVertexAttribArray(1);
 }
 
-void add_triangle(vector<uvec3> triangles, uint32_t a, uint32_t b, uint32_t c)
+void add_triangle(vector<uvec3> &triangles, uint a, uint b, uint c)
 {
   triangles.emplace_back(uvec3(a, b, c));
 }
 
-void add_quad(vector<uvec3> triangles, uint32_t a, uint32_t b, uint32_t c, uint32_t d)
+void add_quad(vector<uvec3> &triangles, uint a, uint b, uint c, uint d)
 {
   triangles.emplace_back(uvec3(a, b, c));
   triangles.emplace_back(uvec3(a, c, d));
@@ -132,16 +132,19 @@ void Mesh::create_sphere( Sphere mesh,
   vector<vec3> ori_vertices;
   vector<uvec3> ori_triangles;
 
+  pos = mesh.pos;
+  size = vec3(mesh.radius, mesh.radius, mesh.radius);
+  color = mesh.color;
+
   // todo
   // pos, radius, color
   // pos, size, color using shader translate
   // todo store and use in draw()
 
-
   int n_stacks = 10;
   int n_slices = 10;
   // add top vertex
-  uint32_t v0 = 0;
+  uint v0 = 0;
   ori_vertices.emplace_back(vec3(0, 1, 0));
   // generate vertices per stack / slice
   for (int i = 0; i < n_stacks - 1; i++)
@@ -157,13 +160,13 @@ void Mesh::create_sphere( Sphere mesh,
     }
   }
   // add bottom vertex
-  uint32_t v1 = ori_vertices.size() - 1;
+  uint v1 = ori_vertices.size() - 1;
   ori_vertices.emplace_back(vec3(0, -1, 0));
   // add top / bottom triangles
   for (int i = 0; i < n_slices; ++i)
   {
-    uint32_t i0 = i + 1;
-    uint32_t i1 = (i + 1) % n_slices + 1;
+    uint i0 = i + 1;
+    uint i1 = (i + 1) % n_slices + 1;
     add_triangle(ori_triangles, v0, i1, i0);
     i0 = i + n_slices * (n_stacks - 2) + 1;
     i1 = (i + 1) % n_slices + n_slices * (n_stacks - 2) + 1;
@@ -172,23 +175,26 @@ void Mesh::create_sphere( Sphere mesh,
   // add quads per stack / slice
   for (int j = 0; j < n_stacks - 2; j++)
   {
-    uint32_t j0 = j * n_slices + 1;
-    uint32_t j1 = (j + 1) * n_slices + 1;
+    uint j0 = j * n_slices + 1;
+    uint j1 = (j + 1) * n_slices + 1;
     for (int i = 0; i < n_slices; i++)
     {
-      uint32_t i0 = j0 + i;
-      uint32_t i1 = j0 + (i + 1) % n_slices;
-      uint32_t i2 = j1 + (i + 1) % n_slices;
-      uint32_t i3 = j1 + i;
+      uint i0 = j0 + i;
+      uint i1 = j0 + (i + 1) % n_slices;
+      uint i2 = j1 + (i + 1) % n_slices;
+      uint i3 = j1 + i;
       add_quad(ori_triangles, i0, i1, i2, i3);
     }
   }
 
   // convert to final primitive
-  vert_num = ori_vertices.size();
-  tri_num = ori_triangles.size();
-  vertices = new vec3[vert_num];
-  triangles = new uvec3[tri_num];
+  this->vert_num = ori_vertices.size();
+  this->tri_num = ori_triangles.size();
+  this->vertices = new vec3[vert_num];
+  this->triangles = new uvec3[tri_num];
+
+  cout << "  vert_num: " << this->vert_num << '\n';
+  cout << "  tri_num:  " << this->tri_num  << '\n';
 
   // Use arrays to store vertices and triangles, instead of using c++ vectors.
   // This is because we have to use arrays when sending data to GPUs.
@@ -205,78 +211,15 @@ void Mesh::create_sphere( Sphere mesh,
   cout << "  shaders created.\n";
 }
 
-void Mesh::create(const char *filename, const char *v_shader_file,
-                  const char *f_shader_file) {
-
-  cout<< "creating mesh\n";
-  vector<vec3> ori_vertices;
-  vector<uvec3> ori_triangles;
-
-  ifstream fs(filename);
-
-  char c;
-  vec3 pos;
-  int index[3];
-  int vid = 0;
-
-  std::string line;
-  while (std::getline(fs, line)) {
-    std::istringstream iss(line);
-
-    iss >> c;
-
-    switch (c) {
-    case 'v': {
-      // read a vertex
-      iss >> pos.x;
-      iss >> pos.y;
-      iss >> pos.z;
-      ori_vertices.push_back(pos);
-      break;
-    }
-    case 'f': {
-      // read a triangle's vertex indices
-      iss >> index[0];
-      iss >> index[1];
-      iss >> index[2];
-      // NOTE: index in obj files starts from 1
-      ori_triangles.push_back(uvec3(index[0] - 1, index[1] - 1, index[2] - 1));
-      break;
-    }
-    default:
-      // skip the line
-      break;
-    }
-  }
-  fs.close();
-
-  vert_num = ori_vertices.size();
-  tri_num = ori_triangles.size();
-  vertices = new vec3[vert_num];
-  triangles = new uvec3[tri_num];
-
-  // Use arrays to store vertices and triangles, instead of using c++ vectors.
-  // This is because we have to use arrays when sending data to GPUs.
-  for (uint i = 0; i < vert_num; i++) {
-    this->vertices[i] = ori_vertices[i];
-  }
-  for (uint i = 0; i < tri_num; i++) {
-    this->triangles[i] = ori_triangles[i];
-  }
-
-  computeNormals();
-  cout << "  normals created.\n";
-  prepareVBOandShaders(v_shader_file, f_shader_file);
-  cout << "  shaders created.\n";
-}
-
-void Mesh::draw(mat4 viewMat, mat4 projMat, vec3 trans, vec3 lightPos0, vec3 lightPos1, vec3 viewPos, float time, bool wireframe=false, float sc=0.5f) {
+void Mesh::draw(mat4 viewMat, mat4 projMat, vec3 lightPos, vec3 viewPos, bool wireframe=false) {
 
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
 
-  if (vert_num <= 0 && tri_num <= 0)
+  if (vert_num <= 0 && tri_num <= 0) {
+    cout << "!! vert & tri empty" << '\n';
     return;
+  }
 
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_LIGHTING);
@@ -288,16 +231,15 @@ void Mesh::draw(mat4 viewMat, mat4 projMat, vec3 trans, vec3 lightPos0, vec3 lig
   glPushMatrix();
 
   glUseProgram(shaderProg.id);
-  mat4 m = translate(mat4(1.0), trans);
-  modelMat = scale(m, vec3(sc, sc, sc));
-  shaderProg.setMatrix4fv("modelMat", 1, value_ptr(modelMat));
-  shaderProg.setMatrix4fv("viewMat", 1, value_ptr(viewMat));
-  shaderProg.setMatrix4fv("projMat", 1, value_ptr(projMat));
-  shaderProg.setFloat3V("lightPos0", 1, value_ptr(lightPos0));
-  shaderProg.setFloat3V("lightPos1", 1, value_ptr(lightPos1));
-  shaderProg.setFloat3V("viewPos", 1, value_ptr(viewPos));
-  shaderProg.setFloat("time", time);
-  shaderProg.setFloat("offset", normal_offset);
+  mat4 m = translate(mat4(1.0), pos);
+  modelMat = scale(m, size);
+  shaderProg.setMatrix4fv("model", 1, value_ptr(modelMat));
+  shaderProg.setMatrix4fv("view", 1, value_ptr(viewMat));
+  shaderProg.setMatrix4fv("projection", 1, value_ptr(projMat));
+  shaderProg.setFloat3V("objectColor", 1, value_ptr(color));
+  shaderProg.setFloat3V("lightColor", 1, value_ptr(vec3(1, 1, 1)));
+  shaderProg.setFloat3V("lightPos", 1, value_ptr(lightPos));
+  // shaderProg.setFloat3V("viewPos", 1, value_ptr(viewPos));
 
   // cout << glm::to_string(modelMat) << endl;
   // cout << glm::to_string(viewMat) << endl;

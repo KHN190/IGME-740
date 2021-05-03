@@ -16,6 +16,8 @@ public:
 	  mat4			mvMat;
     mat4			projMat;
 
+    vec3 getEyeVec3();
+
 private:
     float           fovy;              // view angle
     float           aspect;            // the window ration equal to w/h

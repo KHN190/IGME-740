@@ -30,6 +30,10 @@ public:
   /**mesh data: loaded from the file as arrays**/
   uint vert_num, tri_num;
 
+  vec3 pos;
+  vec3 size;
+  vec3 color;
+
   vec3 *vertices;
   uvec3 *triangles;
   vec3 *fnormals; // normals of triangles, size = # of triangles
@@ -54,8 +58,7 @@ public:
      simplifying the mesh.
   */
   void create_sphere(Sphere mesh, const char *v_shader_file, const char *f_shader_file);
-  void create(const char *filename, const char *v_shader_file, const char *f_shader_file);
-  void draw(mat4 viewMat, mat4 projMat, vec3 trans, vec3 lightPos0, vec3 lightPos1, vec3 viewPos, float time, bool wireframe, float scale);
+  void draw(mat4 viewMat, mat4 projMat, vec3 lightPos, vec3 viewPos, bool wireframe);
 
 private:
   void computeNormals(); // compute both face and vertex normals
@@ -63,7 +66,7 @@ private:
                             const char *f_shader_file);
 };
 
-void add_triangle(vector<uvec3> triangles, uint32_t a, uint32_t b, uint32_t c);
-void add_quad(vector<uvec3> triangles, uint32_t a, uint32_t b, uint32_t c, uint32_t d);
+void add_triangle(vector<uvec3> &triangles, uint a, uint b, uint c);
+void add_quad(vector<uvec3> &triangles, uint a, uint b, uint c, uint d);
 
 #endif

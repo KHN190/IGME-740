@@ -118,12 +118,13 @@ void LoadConfigFile(const char* pFilePath)
                 if(!strcmp(attrType, "num:"))
                     filestr>>g_sphere_num;
                 if(g_sphere_num > 0) {
-                    g_spheres = new Sphere[g_sphere_num];
+                    // g_spheres = new Sphere[g_sphere_num];
                     // todo
                     g_spheres_mesh = new Mesh[g_sphere_num];
 
                     for(int i=0; i<g_sphere_num; i++){
                       Sphere mesh = Sphere();
+                      Mesh sphere;
 
                       filestr>>attrType;
                       if(!strcmp(attrType, "position:")){
@@ -145,11 +146,8 @@ void LoadConfigFile(const char* pFilePath)
                       if(!strcmp(attrType, "phong:"))     filestr>>mesh.phong;
 
                       // todo sphere to mesh
-                      g_spheres[i] = mesh;
-
-                      Mesh sphere;
                       sphere.create_sphere(mesh, "shaders/basic.vert", "shaders/basic.frag");
-
+                      // g_spheres[i] = mesh;
                       g_spheres_mesh[i] = sphere;
                   }
                 }
@@ -270,7 +268,10 @@ void display()
 
     // draw sphere and box
     for (int i=0; i<g_sphere_num; i++)
-        g_spheres[i].Draw(light0_pos, g_cam);
+    {
+        // g_spheres[i].Draw();
+        g_spheres_mesh[i].draw(g_cam.mvMat, g_cam.projMat, g_light.pos, g_cam.getEyeVec3(), false);
+    }
     for (int i=0; i<g_box_num; i++)
         g_boxes[i].Draw();
 

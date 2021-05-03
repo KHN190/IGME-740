@@ -54,8 +54,8 @@ void ShaderProgram::setFloat3V(const char *name, unsigned int count,
                                const float *floatPtr) {
   unsigned int loc = glGetUniformLocation(id, name);
   if (loc == -1) {
-    return;
     // cout << "Uniform float3 vector: " << name << " doesn't exist." << endl;
+    return;
   } else {
     glUniform3fv(loc, count, floatPtr);
   }

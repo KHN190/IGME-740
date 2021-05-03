@@ -50,6 +50,10 @@ Camera :: ~Camera()
 {
 }
 
+vec3 Camera::getEyeVec3() {
+  return vec3(this->eye.x, this->eye.y, this->eye.z);
+}
+
 void Camera::PrintProperty()
 {
 	cout<<"********* Camera **********"<<endl;
