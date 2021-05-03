@@ -23,7 +23,7 @@ class Box{
 public: // it would be better to have some kind of protection on members...
 	unsigned int num;
 
-	vec3 minPos ;
+	vec3 minPos;
 	vec3 maxPos;
   vec3 color;
 
@@ -46,7 +46,7 @@ public:
 
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
-        glDisable(GL_LIGHTING);
+        // glDisable(GL_LIGHTING);
 
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();

@@ -14,7 +14,7 @@
 #include "Sphere.h"
 #include "Box.h"
 #include "Light.h"
-#include "Shader.h"
+#include "Mesh.h"
 
 #include "Text.h"
 
@@ -42,6 +42,7 @@ Box* g_boxes;
 
 unsigned int g_sphere_num;
 Sphere* g_spheres;
+Mesh* g_spheres_mesh;
 
 Light g_light;
 
@@ -118,28 +119,39 @@ void LoadConfigFile(const char* pFilePath)
                     filestr>>g_sphere_num;
                 if(g_sphere_num > 0) {
                     g_spheres = new Sphere[g_sphere_num];
+                    // todo
+                    g_spheres_mesh = new Mesh[g_sphere_num];
 
                     for(int i=0; i<g_sphere_num; i++){
-                    filestr>>attrType;
-                    if(!strcmp(attrType, "position:")){
-                        filestr>>g_spheres[i].pos.x; filestr>>g_spheres[i].pos.y;  filestr>>g_spheres[i].pos.z;
-                    }
-                    filestr>>attrType;
-                    if(!strcmp(attrType, "radius:")){
-                        filestr>>g_spheres[i].radius;
-                    }
-                    filestr>>attrType;
-                    if(!strcmp(attrType, "color:")){
-                        filestr>>g_spheres[i].color.x; filestr>>g_spheres[i].color.y;  filestr>>g_spheres[i].color.z;
-                    }
-                    filestr>>attrType;
-                    if(!strcmp(attrType, "ambient:"))    filestr>>g_spheres[i].ambient;
-                    filestr>>attrType;
-                    if(!strcmp(attrType, "diffuse:"))    filestr>>g_spheres[i].diffuse;
-                    filestr>>attrType;
-                    if(!strcmp(attrType, "phong:"))     filestr>>g_spheres[i].phong;
+                      Sphere mesh = Sphere();
 
-                }
+                      filestr>>attrType;
+                      if(!strcmp(attrType, "position:")){
+                          filestr>>mesh.pos.x; filestr>>mesh.pos.y;  filestr>>mesh.pos.z;
+                      }
+                      filestr>>attrType;
+                      if(!strcmp(attrType, "radius:")){
+                          filestr>>mesh.radius;
+                      }
+                      filestr>>attrType;
+                      if(!strcmp(attrType, "color:")){
+                          filestr>>mesh.color.x; filestr>>mesh.color.y;  filestr>>mesh.color.z;
+                      }
+                      filestr>>attrType;
+                      if(!strcmp(attrType, "ambient:"))    filestr>>mesh.ambient;
+                      filestr>>attrType;
+                      if(!strcmp(attrType, "diffuse:"))    filestr>>mesh.diffuse;
+                      filestr>>attrType;
+                      if(!strcmp(attrType, "phong:"))     filestr>>mesh.phong;
+
+                      // todo sphere to mesh
+                      g_spheres[i] = mesh;
+
+                      Mesh sphere;
+                      sphere.create_sphere(mesh, "shaders/basic.vert", "shaders/basic.frag");
+
+                      g_spheres_mesh[i] = sphere;
+                  }
                 }
                 break;
             case BOX:
@@ -203,30 +215,6 @@ void LoadConfigFile(const char* pFilePath)
     }
 }
 
-void ConfigureShaderAndMatrices()
-{
-    // orthographic projection
-    float near_plane = 1.0f, far_plane = 7.5f;
-    glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-
-    // look at scene's center
-    glm::mat4 lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f),
-                                      glm::vec3( 0.0f, 0.0f,  0.0f),
-                                      glm::vec3( 0.0f, 1.0f,  0.0f));
-    glm::mat4 lightSpaceMatrix = lightProjection * lightView;
-
-
-
-    // depthShader.use();
-    // glUniformMatrix4fv(lightSpaceMatrixLocation, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
-    //
-    // glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-    // glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-    //     glClear(GL_DEPTH_BUFFER_BIT);
-    //     // RenderScene(depthShader);
-    // glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
 void initialization()
 {
     //g_cam.set(3.0f, 4.0f, 3.0f, 0.0f, 0.0f, 0.0f, g_winWidth, g_winHeight);
@@ -278,49 +266,6 @@ void display()
 
     glEnable(GL_LIGHTING);
     // glLightfv(GL_LIGHT0, GL_POSITION, light0_pos); // commenting out this line to make object always lit up in front of the cam.
-
-
-
-    // generate depth buffer
-    unsigned int depthMapFBO;
-    glGenFramebuffers(1, &depthMapFBO);
-
-    unsigned int depthMap;
-    glGenTextures(1, &depthMap);
-
-    glBindTexture(GL_TEXTURE_2D, depthMap);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-                 g_winWidth, g_winHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-
-
-    // render to depth map
-    glViewport(0, 0, g_winWidth, g_winHeight);
-    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-    glClear(GL_DEPTH_BUFFER_BIT);
-
-    ConfigureShaderAndMatrices();
-    // RenderScene();
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    // then render scene as normal with shadow mapping (using depth map)
-    glViewport(0, 0, g_winWidth, g_winHeight);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // ConfigureShaderAndMatrices();
-    glBindTexture(GL_TEXTURE_2D, depthMap);
-    // RenderScene();
-
 
 
     // draw sphere and box
