@@ -19,6 +19,7 @@ using namespace glm;
 class Sphere{
 
 public:
+ 	unsigned int id;
 
 	vec3 pos;
   float radius;
@@ -50,6 +51,21 @@ public:
 
       glPopMatrix();
     };
+
+    // ray & sphere intersection
+    bool ray_intersect(vec3 orig, vec3 dir, float dist_i) {
+      vec3 oc = orig - pos;
+      float a = dot(dir, dir);
+      float b = 2.0 * dot(oc, dir);
+      float c = dot(oc,oc) - radius*radius;
+      float discriminant = b*b - 4*a*c;
+      // also return distance of hit
+      if (discriminant > 0) {
+        dist_i = (-b - sqrt(discriminant)) / (2.0 * a);
+        return true;
+      }
+      return false;
+    }
 };
 
 #endif

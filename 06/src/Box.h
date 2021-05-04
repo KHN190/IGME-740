@@ -21,7 +21,7 @@ using namespace glm;
 class Box{
 
 public:
-	unsigned int num;
+	unsigned int id;
 
 	vec3 minPos;
 	vec3 maxPos;
@@ -97,6 +97,42 @@ public:
         glPopMatrix();
     };
 
+		bool ray_intersect(vec3 orig, vec3 dir, float dist_i) {
+			float tmin = (minPos.x - orig.x) / dir.x;
+	    float tmax = (maxPos.x - orig.x) / dir.x;
+
+	    if (tmin > tmax) swap(tmin, tmax);
+
+	    float tymin = (minPos.y - orig.y) / dir.y;
+	    float tymax = (maxPos.y - orig.y) / dir.y;
+
+	    if (tymin > tymax) swap(tymin, tymax);
+
+	    if ((tmin > tymax) || (tymin > tmax))
+	        return false;
+
+	    if (tymin > tmin)
+	        tmin = tymin;
+
+	    if (tymax < tmax)
+	        tmax = tymax;
+
+	    float tzmin = (minPos.z - orig.z) / dir.z;
+	    float tzmax = (maxPos.z - orig.z) / dir.z;
+
+	    if (tzmin > tzmax) swap(tzmin, tzmax);
+
+	    if ((tmin > tzmax) || (tzmin > tmax))
+	        return false;
+
+	    if (tzmin > tmin)
+	        tmin = tzmin;
+
+	    if (tzmax < tmax)
+	        tmax = tzmax;
+
+	    return true;
+    }
 };
 
 #endif

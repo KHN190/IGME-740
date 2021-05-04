@@ -18,15 +18,16 @@ public:
 
     vec3 getEyeVec3();
 
-private:
     float           fovy;              // view angle
+
+private:
     float           aspect;            // the window ration equal to w/h
     float           near_plane;
     float           far_plane;
 
     vec4			axis_n;            //eye-lookat
-    vec4		    axis_u;
-    vec4	        axis_v;            //up axis
+    vec4		  axis_u;
+    vec4	    axis_v;            //up axis
     vec4			world_up;
 
     vec2			mouse_pos;         // the cursor position of moving mouse
