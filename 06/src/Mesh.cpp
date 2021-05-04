@@ -1,5 +1,6 @@
 #include "Mesh.h"
-#include "Sphere.h"
+// #include "Sphere.h"
+// #include "Box.h"
 
 Mesh::Mesh() {
   vert_num = tri_num = 0;
@@ -132,17 +133,16 @@ void Mesh::create_sphere( Sphere mesh,
   vector<vec3> ori_vertices;
   vector<uvec3> ori_triangles;
 
+  // store properties for drawing
   pos = mesh.pos;
   size = vec3(mesh.radius, mesh.radius, mesh.radius);
   color = mesh.color;
 
-  // todo
-  // pos, radius, color
-  // pos, size, color using shader translate
-  // todo store and use in draw()
+  rotMat = mat4(1.0f);
+  invRotMat = inverse(rotMat);
 
-  int n_stacks = 10;
-  int n_slices = 10;
+  int n_stacks = 20;
+  int n_slices = 20;
   // add top vertex
   uint v0 = 0;
   ori_vertices.emplace_back(vec3(0, 1, 0));
@@ -188,13 +188,106 @@ void Mesh::create_sphere( Sphere mesh,
   }
 
   // convert to final primitive
-  this->vert_num = ori_vertices.size();
-  this->tri_num = ori_triangles.size();
+  vert_num = ori_vertices.size();
+  tri_num = ori_triangles.size();
+  vertices = new vec3[vert_num];
+  triangles = new uvec3[tri_num];
+
+  cout << "  vert_num: " << vert_num << '\n';
+  cout << "  tri_num:  " << tri_num  << '\n';
+
+  // Use arrays to store vertices and triangles, instead of using c++ vectors.
+  // This is because we have to use arrays when sending data to GPUs.
+  for (uint i = 0; i < vert_num; i++) {
+    this->vertices[i] = ori_vertices[i];
+  }
+  for (uint i = 0; i < tri_num; i++) {
+    this->triangles[i] = ori_triangles[i];
+  }
+
+  computeNormals();
+  cout << "  normals created.\n";
+  prepareVBOandShaders(v_shader_file, f_shader_file);
+  cout << "  shaders created.\n";
+}
+
+void Mesh::create_box(Box mesh, const char *v_shader_file, const char *f_shader_file)
+{
+  cout << "creating box mesh\n";
+  vector<vec3> ori_vertices;
+  vector<uvec3> ori_triangles;
+
+  vec3 maxPos = mesh.maxPos;
+  vec3 minPos = mesh.minPos;
+
+  // store properties for drawing
+  // pos = (maxPos + minPos) * 0.5f;
+  pos = vec3(0, 0, 0);
+  size = vec3(1, 1, 1);
+  color = mesh.color;
+
+  rotMat = mesh.rotMat;
+  invRotMat = mesh.invRotMat;
+
+  cout << "  color: " << glm::to_string(mesh.color) << '\n';
+
+  // Counter-clockwise (CCW) with normal pointing out
+  // Upper face (y = 1.0f)
+  ori_vertices.emplace_back(vec3(maxPos.x, maxPos.y, minPos.z)); // 0 221
+  ori_vertices.emplace_back(vec3(minPos.x, maxPos.y, minPos.z)); // 1 121
+  ori_vertices.emplace_back(vec3(minPos.x, maxPos.y, maxPos.z)); // 2 122
+  ori_vertices.emplace_back(vec3(maxPos.x, maxPos.y, maxPos.z)); // 3 222
+
+  add_quad(ori_triangles, 0, 1, 2, 3);
+
+  // Bottom face (y = -1.0f)
+  ori_vertices.emplace_back(vec3(maxPos.x, minPos.y, maxPos.z)); // 4 212
+  ori_vertices.emplace_back(vec3(minPos.x, minPos.y, maxPos.z)); // 5 112
+  ori_vertices.emplace_back(vec3(minPos.x, minPos.y, minPos.z)); // 6 111
+  ori_vertices.emplace_back(vec3(maxPos.x, minPos.y, minPos.z)); // 7 211
+
+  add_quad(ori_triangles, 4, 5, 6, 7);
+
+  // Front face  (z = 1.0f)
+  ori_vertices.emplace_back(vec3(maxPos.x, maxPos.y, maxPos.z)); // 3 222
+  ori_vertices.emplace_back(vec3(minPos.x, maxPos.y, maxPos.z)); // 2 122
+  ori_vertices.emplace_back(vec3(minPos.x, minPos.y, maxPos.z)); // 5 112
+  ori_vertices.emplace_back(vec3(maxPos.x, minPos.y, maxPos.z)); // 4 212
+
+  add_quad(ori_triangles, 3, 2, 5, 4);
+
+  // Back face (z = -1.0f)
+  ori_vertices.emplace_back(vec3(maxPos.x, minPos.y, minPos.z)); // 7 211
+  ori_vertices.emplace_back(vec3(minPos.x, minPos.y, minPos.z)); // 6 111
+  ori_vertices.emplace_back(vec3(minPos.x, maxPos.y, minPos.z)); // 1 121
+  ori_vertices.emplace_back(vec3(maxPos.x, maxPos.y, minPos.z)); // 0 221
+
+  add_quad(ori_triangles, 7, 6, 1, 0);
+
+  // Left face (x = -1.0f)
+  ori_vertices.emplace_back(vec3(minPos.x, maxPos.y, maxPos.z)); // 2 122
+  ori_vertices.emplace_back(vec3(minPos.x, maxPos.y, minPos.z)); // 1 121
+  ori_vertices.emplace_back(vec3(minPos.x, minPos.y, minPos.z)); // 6 111
+  ori_vertices.emplace_back(vec3(minPos.x, minPos.y, maxPos.z)); // 5 112
+
+  add_quad(ori_triangles, 2, 1, 6, 5);
+
+  // Right face (x = 1.0f)
+  ori_vertices.emplace_back(vec3(maxPos.x, maxPos.y, minPos.z)); // 0 221
+  ori_vertices.emplace_back(vec3(maxPos.x, maxPos.y, maxPos.z)); // 3 222
+  ori_vertices.emplace_back(vec3(maxPos.x, minPos.y, maxPos.z)); // 4 212
+  ori_vertices.emplace_back(vec3(maxPos.x, minPos.y, minPos.z)); // 7 211
+
+  add_quad(ori_triangles, 0, 3, 4, 7);
+
+  // convert to final primitive
+  vert_num = ori_vertices.size();
+  tri_num = ori_triangles.size();
   this->vertices = new vec3[vert_num];
   this->triangles = new uvec3[tri_num];
 
-  cout << "  vert_num: " << this->vert_num << '\n';
-  cout << "  tri_num:  " << this->tri_num  << '\n';
+  cout << "  vert_num: " << vert_num << '\n';
+  cout << "  tri_num:  " << tri_num  << '\n';
 
   // Use arrays to store vertices and triangles, instead of using c++ vectors.
   // This is because we have to use arrays when sending data to GPUs.
@@ -231,7 +324,7 @@ void Mesh::draw(mat4 viewMat, mat4 projMat, vec3 lightPos, vec3 viewPos, bool wi
   glPushMatrix();
 
   glUseProgram(shaderProg.id);
-  mat4 m = translate(mat4(1.0), pos);
+  mat4 m = translate(rotMat, pos);
   modelMat = scale(m, size);
   shaderProg.setMatrix4fv("model", 1, value_ptr(modelMat));
   shaderProg.setMatrix4fv("view", 1, value_ptr(viewMat));

@@ -20,7 +20,7 @@ using namespace glm;
 
 class Box{
 
-public: // it would be better to have some kind of protection on members...
+public:
 	unsigned int num;
 
 	vec3 minPos;
@@ -41,12 +41,12 @@ public:
     ~Box(){};
     void Draw()
     {
-        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
-        // glDisable(GL_LIGHTING);
+        glDisable(GL_LIGHTING);
 
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();

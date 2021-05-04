@@ -39,6 +39,7 @@ const char dataFile[128] = "data/geo.txt";
 
 unsigned int g_box_num;
 Box* g_boxes;
+Mesh* g_boxes_mesh;
 
 unsigned int g_sphere_num;
 Sphere* g_spheres;
@@ -119,7 +120,6 @@ void LoadConfigFile(const char* pFilePath)
                     filestr>>g_sphere_num;
                 if(g_sphere_num > 0) {
                     // g_spheres = new Sphere[g_sphere_num];
-                    // todo
                     g_spheres_mesh = new Mesh[g_sphere_num];
 
                     for(int i=0; i<g_sphere_num; i++){
@@ -145,8 +145,9 @@ void LoadConfigFile(const char* pFilePath)
                       filestr>>attrType;
                       if(!strcmp(attrType, "phong:"))     filestr>>mesh.phong;
 
-                      // todo sphere to mesh
+                      // sphere to mesh
                       sphere.create_sphere(mesh, "shaders/basic.vert", "shaders/basic.frag");
+
                       // g_spheres[i] = mesh;
                       g_spheres_mesh[i] = sphere;
                   }
@@ -159,22 +160,26 @@ void LoadConfigFile(const char* pFilePath)
 
                 if(g_box_num > 0) {
                     g_boxes = new Box[g_box_num];
+                    g_boxes_mesh = new Mesh[g_box_num];
                     for(int i=0; i<g_box_num; i++){
+                        Box mesh;
+                        Mesh box_mesh;
+
                         filestr>>attrType;
                         if(!strcmp(attrType, "conner_position:")){
-                            filestr>>g_boxes[i].minPos.x;
-                            filestr>>g_boxes[i].minPos.y;
-                            filestr>>g_boxes[i].minPos.z;
-                            filestr>>g_boxes[i].maxPos.x;
-                            filestr>>g_boxes[i].maxPos.y;
-                            filestr>>g_boxes[i].maxPos.z;
+                            filestr>>mesh.minPos.x;
+                            filestr>>mesh.minPos.y;
+                            filestr>>mesh.minPos.z;
+                            filestr>>mesh.maxPos.x;
+                            filestr>>mesh.maxPos.y;
+                            filestr>>mesh.maxPos.z;
                         }
 
                         filestr>>attrType;
                         if(!strcmp(attrType, "color:")){
-                            filestr>>g_boxes[i].color.x;
-                            filestr>>g_boxes[i].color.y;
-                            filestr>>g_boxes[i].color.z;
+                            filestr>>mesh.color.x;
+                            filestr>>mesh.color.y;
+                            filestr>>mesh.color.z;
                         }
                         filestr>>attrType;
                         if(!strcmp(attrType, "rotate:")){
@@ -196,15 +201,21 @@ void LoadConfigFile(const char* pFilePath)
 
                             //cout<<glm::to_string(m)<<endl;
 
-                            g_boxes[i].rotMat = m;
-                            g_boxes[i].invRotMat = inverse(m);
+                            mesh.rotMat = m;
+                            mesh.invRotMat = inverse(m);
                         }
                         filestr>>attrType;
-                        if(!strcmp(attrType, "ambient:"))    filestr>>g_boxes[i].ambient;
+                        if(!strcmp(attrType, "ambient:"))    filestr>>mesh.ambient;
                         filestr>>attrType;
-                        if(!strcmp(attrType, "diffuse:"))    filestr>>g_boxes[i].diffuse;
+                        if(!strcmp(attrType, "diffuse:"))    filestr>>mesh.diffuse;
                         filestr>>attrType;
-                        if(!strcmp(attrType, "phong:"))    filestr>>g_boxes[i].phong;
+                        if(!strcmp(attrType, "phong:"))    filestr>>mesh.phong;
+
+                        // error: it modifies sphere meshes??
+                        box_mesh.create_box(mesh, "shaders/basic.vert", "shaders/basic.frag");
+
+                        g_boxes[i] = mesh;
+                        g_boxes_mesh[i] = box_mesh;
                     }
                     loop = false;
                 }
@@ -265,15 +276,17 @@ void display()
     glEnable(GL_LIGHTING);
     // glLightfv(GL_LIGHT0, GL_POSITION, light0_pos); // commenting out this line to make object always lit up in front of the cam.
 
-
     // draw sphere and box
     for (int i=0; i<g_sphere_num; i++)
     {
         // g_spheres[i].Draw();
-        g_spheres_mesh[i].draw(g_cam.mvMat, g_cam.projMat, g_light.pos, g_cam.getEyeVec3(), false);
+        // g_spheres_mesh[i].draw(g_cam.mvMat, g_cam.projMat, g_light.pos, g_cam.getEyeVec3(), true);
     }
     for (int i=0; i<g_box_num; i++)
-        g_boxes[i].Draw();
+    {
+        // g_boxes[i].Draw();
+        g_boxes_mesh[i].draw(g_cam.mvMat, g_cam.projMat, g_light.pos, g_cam.getEyeVec3(), false);
+    }
 
     // displaying the camera
     g_cam.drawGrid();
@@ -345,7 +358,7 @@ void keyboard(unsigned char key, int x, int y)
 int main(int argc, char **argv)
 {
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_3_2_CORE_PROFILE | GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
+    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(g_winWidth, g_winHeight);
     glutInitWindowPosition(0, 0);
     glutCreateWindow("Ray Casting");

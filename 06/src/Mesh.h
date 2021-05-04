@@ -34,6 +34,9 @@ public:
   vec3 size;
   vec3 color;
 
+  mat4 rotMat;
+  mat4 invRotMat;
+
   vec3 *vertices;
   uvec3 *triangles;
   vec3 *fnormals; // normals of triangles, size = # of triangles
@@ -58,6 +61,7 @@ public:
      simplifying the mesh.
   */
   void create_sphere(Sphere mesh, const char *v_shader_file, const char *f_shader_file);
+  void create_box(Box mesh, const char *v_shader_file, const char *f_shader_file);
   void draw(mat4 viewMat, mat4 projMat, vec3 lightPos, vec3 viewPos, bool wireframe);
 
 private:
